@@ -2,12 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Pedometer } from 'expo-sensors';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { AppState, AppStateStatus, Platform } from 'react-native';
-import {
-    initialize,
-    requestPermission,
-    readRecords,
-} from 'react-native-health-connect';
+import { AppState, AppStateStatus } from 'react-native';
 
 const STEP_STORAGE_KEY = 'workout_step_data';
 const DEFAULT_STEP_GOAL = 10000;
@@ -30,12 +25,11 @@ export const [StepProvider, useSteps] = createContextHook(() => {
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Legacy/iOS Refs
     const subscriptionRef = useRef<{ remove: () => void } | null>(null);
     const lastSensorValueRef = useRef<number | null>(null);
     const baseStepsRef = useRef<number>(0);
 
-    // Initializer
+    // Initialize - restore data and check availability
     useEffect(() => {
         const init = async () => {
             try {
@@ -57,26 +51,13 @@ export const [StepProvider, useSteps] = createContextHook(() => {
                     }
                 }
 
-                if (Platform.OS === 'android') {
-                    // Initialize Health Connect
-                    const isInitialized = await initialize();
-                    if (!isInitialized) {
-                        setIsAvailable(false);
-                        return;
-                    }
+                // Check Pedometer availability (works on both iOS and Android)
+                const available = await Pedometer.isAvailableAsync();
+                setIsAvailable(available);
 
-                    // Request Permissions
-                    await requestPermission([
-                        { accessType: 'read', recordType: 'Steps' },
-                        //  { accessType: 'write', recordType: 'Steps' } // Optional, if we wrote data
-                    ]);
-
-                    setIsAvailable(true);
-                    fetchHealthConnectSteps();
-                } else {
-                    // iOS - Pedometer
-                    const available = await Pedometer.isAvailableAsync();
-                    setIsAvailable(available);
+                // Fetch today's steps if available
+                if (available) {
+                    await fetchTodaySteps();
                 }
             } catch (e) {
                 console.error("StepContext Init Error", e);
@@ -88,27 +69,22 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         init();
     }, []);
 
-    // Health Connect Fetcher
-    const fetchHealthConnectSteps = async () => {
-        if (Platform.OS !== 'android') return;
+    // Fetch today's step count
+    const fetchTodaySteps = async () => {
         try {
-            const startOfDay = new Date();
-            startOfDay.setHours(0, 0, 0, 0);
-            const now = new Date();
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+            const end = new Date();
 
-            const records = await readRecords('Steps', {
-                timeRangeFilter: {
-                    operator: 'between',
-                    startTime: startOfDay.toISOString(),
-                    endTime: now.toISOString(),
-                },
-            });
-
-            const totalSteps = records.reduce((sum, record) => sum + record.count, 0);
-            setCurrentSteps(totalSteps);
-            saveData(totalSteps, null, stepGoal);
+            const result = await Pedometer.getStepCountAsync(start, end);
+            if (result && result.steps >= 0) {
+                const steps = result.steps;
+                setCurrentSteps(steps);
+                baseStepsRef.current = steps;
+                saveData(steps, null, stepGoal);
+            }
         } catch (e) {
-            console.error("Error fetching steps from Health Connect", e);
+            // Silently fail - step fetch is best-effort
         }
     };
 
@@ -127,16 +103,10 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         }
     };
 
-    // Start watching steps (iOS / Android Live)
+    // Start watching steps (live updates)
     const startWatching = useCallback(() => {
-        if (Platform.OS === 'android') {
-            // Android: Just fetch periodically or on foreground
-            fetchHealthConnectSteps();
-            return;
-        }
-
-        // iOS Logic
         if (!isAvailable || subscriptionRef.current) return;
+
         subscriptionRef.current = Pedometer.watchStepCount(result => {
             const sensorValue = result.steps;
             if (lastSensorValueRef.current === null) {
@@ -162,7 +132,7 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         }
     }, []);
 
-    // Handle app state changes (Refresh data)
+    // Handle app state changes
     useEffect(() => {
         const handleAppStateChange = async (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active') {
@@ -179,23 +149,9 @@ export const [StepProvider, useSteps] = createContextHook(() => {
                     }
                 }
 
-                if (Platform.OS === 'android') {
-                    fetchHealthConnectSteps();
-                } else {
-                    // iOS Pedometer fetch
-                    if (isAvailable) {
-                        // Logic to get historical steps if needed, but Pedometer.watch usually covers it
-                        // Or try getStepCountAsync for today
-                        const start = new Date();
-                        start.setHours(0, 0, 0, 0);
-                        const end = new Date();
-                        try {
-                            const result = await Pedometer.getStepCountAsync(start, end);
-                            if (result && result.steps > currentSteps) {
-                                setCurrentSteps(result.steps);
-                            }
-                        } catch { }
-                    }
+                // Refresh step count and start watching
+                if (isAvailable) {
+                    await fetchTodaySteps();
                     startWatching();
                 }
             } else if (nextAppState === 'background') {
@@ -214,7 +170,7 @@ export const [StepProvider, useSteps] = createContextHook(() => {
             subscription.remove();
             stopWatching();
         };
-    }, [isAvailable, startWatching, stopWatching, stepGoal, currentSteps]);
+    }, [isAvailable, startWatching, stopWatching, stepGoal]);
 
     // Set step goal
     const setStepGoal = useCallback(async (goal: number) => {
@@ -235,6 +191,7 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         isAvailable,
         isLoading,
         startWatching,
-        stopWatching
+        stopWatching,
+        refreshSteps: fetchTodaySteps
     };
 });

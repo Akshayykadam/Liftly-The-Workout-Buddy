@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "liftly",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -47,28 +47,10 @@
         }
       ],
       [
-        "react-native-health-connect",
-        {
-          "rationale_activity_recognition": "We need access to activity data to track your steps and fitness.",
-          "rationale_steps_read": "Read access to show your daily step count.",
-          "rationale_steps_write": "Write access to sync your step data.",
-          "rationale_weight_read": "Read access to show your weight history.",
-          "rationale_height_read": "Read access to calculate BMI.",
-          "rationale_body_fat_read": "Read access to show body composition.",
-          "rationale_active_calories_burned_read": "Read access to show calories burned.",
-          "rationale_total_calories_burned_read": "Read access to show total energy expenditure.",
-          "rationale_distance_read": "Read access to show distance covered.",
-          "rationale_heart_rate_read": "Read access to show heart rate data.",
-          "rationale_sleep_session_read": "Read access to show sleep duration.",
-          "rationale_hydration_read": "Read access to show water intake.",
-          "rationale_nutrition_read": "Read access to show nutrition data."
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 26
+            "minSdkVersion": 24
           }
         }
       ]
