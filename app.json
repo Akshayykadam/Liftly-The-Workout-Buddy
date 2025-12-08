@@ -63,6 +63,14 @@
           "rationale_hydration_read": "Read access to show water intake.",
           "rationale_nutrition_read": "Read access to show nutrition data."
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
       ]
     ],
     "experiments": {
@@ -70,7 +78,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "4f94cbc1-5afd-4c24-8b62-1d897c763844"
+        "projectId": "29c81ba2-7ddd-4593-9541-12e7952b92ef"
       }
     }
   }
