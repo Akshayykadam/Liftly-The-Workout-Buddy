@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700' as const,
     color: COLORS.textPrimary,
-    marginBottom: 8,
+    marginBottom: 4,
     letterSpacing: -0.5
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500' as const,
     color: COLORS.accent,
     letterSpacing: 0.5

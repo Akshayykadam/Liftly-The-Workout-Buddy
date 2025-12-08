@@ -18,11 +18,21 @@ Liftly is a comprehensive React Native mobile application designed to help you t
 - **Interactive Charts**: Visualize weekly and monthly progress trends with dynamic graphs.
 - **Stats Overview**: Monitor average, minimum, and maximum weight stats.
 
+### 🏥 Life Profile & Health Connect
+- **Comprehensive Health Dashboard**: A dedicated view for all your vital stats.
+- **Platform Integration**: Seamlessly syncs with **Android Health Connect**.
+- **Metrics Tracked**:
+  - Total Calories Burned (Active + Resting)
+  - Sleep Duration & Sessions
+  - Heart Rate Monitoring
+  - Distance Covered
+  - Hydration Logging
+  - Body Metrics (Weight, Height, BMI)
+
 ### 👤 Personalization
-- **Profile Management**: customizable profile with BMI calculation.
-- **Goal Setting**: Set meaningful fitness goals (Weight Loss, Maintenance, Muscle Gain).
-- **Step Tracking**: Integrated pedometer to track daily activity levels.
-- **Smart Reminders**: Customizable workout notifications to keep you consistent.
+- **Profile Management**: Customizable profile with BMI calculation and goal setting.
+- **Smart Reminders**: Flexible notification system for workout reminders (by day and time).
+- **Step Tracking**: Visual daily step goals with progress rings.
 
 ## Tech Stack
 

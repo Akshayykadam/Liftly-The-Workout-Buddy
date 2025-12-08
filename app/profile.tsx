@@ -816,7 +816,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surface
     },
     headerTitle: {
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: '700' as const,
         color: COLORS.textPrimary,
         letterSpacing: -0.5

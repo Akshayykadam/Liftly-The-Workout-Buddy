@@ -1,7 +1,7 @@
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useSteps } from '@/contexts/StepContext';
 import * as Haptics from 'expo-haptics';
-import { Check, Flame, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, Moon, User } from 'lucide-react-native';
+import { Check, Flame, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, Moon, User, Heart } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import {
@@ -26,7 +26,8 @@ const COLORS = {
   accent: '#CCFF00',
   textPrimary: '#FFFFFF',
   textSecondary: '#A0A0A0',
-  border: '#1F1F1F'
+  border: '#1F1F1F',
+  red: '#FF4757'
 } as const;
 
 export default function HomeScreen() {
@@ -74,12 +75,20 @@ export default function HomeScreen() {
               Day {currentDayNumber} – {currentWorkout.title}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.profileButton}
-            onPress={() => router.push('/profile')}
-          >
-            <User size={24} color={COLORS.accent} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => router.push('/health')}
+            >
+              <Heart size={24} color={COLORS.red} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => router.push('/profile')}
+            >
+              <User size={24} color={COLORS.accent} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.statsContainer}>
@@ -684,14 +693,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700' as const,
     color: COLORS.textPrimary,
-    marginBottom: 8,
+    marginBottom: 4,
     letterSpacing: -0.5
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500' as const,
     color: COLORS.accent,
     letterSpacing: 0.5

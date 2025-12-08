@@ -1,4 +1,5 @@
 import { useUser } from '@/contexts/UserContext';
+
 import * as Haptics from 'expo-haptics';
 import {
     TrendingUp,
@@ -59,6 +60,8 @@ export default function ProgressScreen() {
     const weightChange = getWeightChange();
     const weeklyStats = getWeeklyStats();
     const monthlyStats = getMonthlyStats();
+
+
 
     const handleLogWeight = (weight: number) => {
         logWeight(weight);
@@ -227,13 +230,15 @@ export default function ProgressScreen() {
                     </View>
                 )}
 
+
+
                 {/* Empty State */}
                 {weightHistory.length < 2 && (
                     <View style={styles.emptyState}>
                         <BarChart3 size={48} color={COLORS.textSecondary} strokeWidth={1.5} />
                         <Text style={styles.emptyTitle}>Start Tracking Your Progress</Text>
                         <Text style={styles.emptyDescription}>
-                            Log your weight daily to see trends and insights. We recommend weighing yourself at the same time each day.
+                            Log your weight daily to see trends and insights.
                         </Text>
                     </View>
                 )}
@@ -500,7 +505,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20
     },
     headerTitle: {
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: '700' as const,
         color: COLORS.textPrimary,
         letterSpacing: -0.5
@@ -799,5 +804,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700' as const,
         color: COLORS.black
-    }
+    },
+
 });

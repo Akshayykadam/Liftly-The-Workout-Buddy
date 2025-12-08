@@ -2,7 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Pedometer } from 'expo-sensors';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
+import {
+    initialize,
+    requestPermission,
+    readRecords,
+} from 'react-native-health-connect';
 
 const STEP_STORAGE_KEY = 'workout_step_data';
 const DEFAULT_STEP_GOAL = 10000;
@@ -24,52 +29,88 @@ export const [StepProvider, useSteps] = createContextHook(() => {
     const [stepGoal, setStepGoalState] = useState(DEFAULT_STEP_GOAL);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Legacy/iOS Refs
     const subscriptionRef = useRef<{ remove: () => void } | null>(null);
     const lastSensorValueRef = useRef<number | null>(null);
     const baseStepsRef = useRef<number>(0);
 
-    // Check sensor availability
+    // Initializer
     useEffect(() => {
-        const checkAvailability = async () => {
-            const available = await Pedometer.isAvailableAsync();
-            setIsAvailable(available);
-        };
-        checkAvailability();
-    }, []);
-
-    // Load persisted step data
-    useEffect(() => {
-        const loadData = async () => {
+        const init = async () => {
             try {
+                // Restore saved goal/steps first
                 const stored = await AsyncStorage.getItem(STEP_STORAGE_KEY);
                 if (stored) {
                     const data: StepData = JSON.parse(stored);
-                    const todayKey = getTodayKey();
-
-                    if (data.date === todayKey) {
-                        // Same day - restore steps
+                    if (data.date === getTodayKey()) {
                         setCurrentSteps(data.steps);
                         baseStepsRef.current = data.steps;
                         lastSensorValueRef.current = data.lastSensorValue;
                         setStepGoalState(data.stepGoal || DEFAULT_STEP_GOAL);
                     } else {
-                        // New day - reset steps but keep goal
+                        // Reset for new day
                         setCurrentSteps(0);
                         baseStepsRef.current = 0;
                         lastSensorValueRef.current = null;
                         setStepGoalState(data.stepGoal || DEFAULT_STEP_GOAL);
-                        // Save the reset
-                        await saveData(0, null, data.stepGoal || DEFAULT_STEP_GOAL);
                     }
                 }
-            } catch {
-                // Failed to load step data
+
+                if (Platform.OS === 'android') {
+                    // Initialize Health Connect
+                    const isInitialized = await initialize();
+                    if (!isInitialized) {
+                        setIsAvailable(false);
+                        return;
+                    }
+
+                    // Request Permissions
+                    await requestPermission([
+                        { accessType: 'read', recordType: 'Steps' },
+                        //  { accessType: 'write', recordType: 'Steps' } // Optional, if we wrote data
+                    ]);
+
+                    setIsAvailable(true);
+                    fetchHealthConnectSteps();
+                } else {
+                    // iOS - Pedometer
+                    const available = await Pedometer.isAvailableAsync();
+                    setIsAvailable(available);
+                }
+            } catch (e) {
+                console.error("StepContext Init Error", e);
+                setIsAvailable(false);
             } finally {
                 setIsLoading(false);
             }
         };
-        loadData();
+        init();
     }, []);
+
+    // Health Connect Fetcher
+    const fetchHealthConnectSteps = async () => {
+        if (Platform.OS !== 'android') return;
+        try {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const now = new Date();
+
+            const records = await readRecords('Steps', {
+                timeRangeFilter: {
+                    operator: 'between',
+                    startTime: startOfDay.toISOString(),
+                    endTime: now.toISOString(),
+                },
+            });
+
+            const totalSteps = records.reduce((sum, record) => sum + record.count, 0);
+            setCurrentSteps(totalSteps);
+            saveData(totalSteps, null, stepGoal);
+        } catch (e) {
+            console.error("Error fetching steps from Health Connect", e);
+        }
+    };
 
     // Save step data to storage
     const saveData = async (steps: number, sensorValue: number | null, goal: number) => {
@@ -86,18 +127,21 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         }
     };
 
-    // Start watching steps
+    // Start watching steps (iOS / Android Live)
     const startWatching = useCallback(() => {
-        if (!isAvailable || subscriptionRef.current) return;
+        if (Platform.OS === 'android') {
+            // Android: Just fetch periodically or on foreground
+            fetchHealthConnectSteps();
+            return;
+        }
 
+        // iOS Logic
+        if (!isAvailable || subscriptionRef.current) return;
         subscriptionRef.current = Pedometer.watchStepCount(result => {
             const sensorValue = result.steps;
-
             if (lastSensorValueRef.current === null) {
-                // First reading - just record sensor value, don't add steps
                 lastSensorValueRef.current = sensorValue;
             } else {
-                // Calculate delta from last sensor reading
                 const delta = sensorValue - lastSensorValueRef.current;
                 if (delta > 0) {
                     const newSteps = baseStepsRef.current + delta;
@@ -118,43 +162,42 @@ export const [StepProvider, useSteps] = createContextHook(() => {
         }
     }, []);
 
-    // Handle app state changes
+    // Handle app state changes (Refresh data)
     useEffect(() => {
         const handleAppStateChange = async (nextAppState: AppStateStatus) => {
             if (nextAppState === 'active') {
-                // App came to foreground - check if day changed
+                // Check midnight reset
                 const todayKey = getTodayKey();
                 const stored = await AsyncStorage.getItem(STEP_STORAGE_KEY);
-
                 if (stored) {
                     const data: StepData = JSON.parse(stored);
                     if (data.date !== todayKey) {
-                        // New day - reset
                         setCurrentSteps(0);
                         baseStepsRef.current = 0;
                         lastSensorValueRef.current = null;
-                        await saveData(0, null, stepGoal);
+                        saveData(0, null, stepGoal);
                     }
                 }
 
-                // Try to get historical steps for today
-                if (isAvailable) {
-                    try {
+                if (Platform.OS === 'android') {
+                    fetchHealthConnectSteps();
+                } else {
+                    // iOS Pedometer fetch
+                    if (isAvailable) {
+                        // Logic to get historical steps if needed, but Pedometer.watch usually covers it
+                        // Or try getStepCountAsync for today
                         const start = new Date();
                         start.setHours(0, 0, 0, 0);
                         const end = new Date();
-                        const result = await Pedometer.getStepCountAsync(start, end);
-                        if (result && result.steps > currentSteps) {
-                            setCurrentSteps(result.steps);
-                            baseStepsRef.current = result.steps;
-                            await saveData(result.steps, lastSensorValueRef.current, stepGoal);
-                        }
-                    } catch {
-                        // getStepCountAsync might not be supported
+                        try {
+                            const result = await Pedometer.getStepCountAsync(start, end);
+                            if (result && result.steps > currentSteps) {
+                                setCurrentSteps(result.steps);
+                            }
+                        } catch { }
                     }
+                    startWatching();
                 }
-
-                startWatching();
             } else if (nextAppState === 'background') {
                 stopWatching();
             }
@@ -162,7 +205,7 @@ export const [StepProvider, useSteps] = createContextHook(() => {
 
         const subscription = AppState.addEventListener('change', handleAppStateChange);
 
-        // Start watching when component mounts
+        // Initial start
         if (isAvailable) {
             startWatching();
         }
@@ -172,27 +215,6 @@ export const [StepProvider, useSteps] = createContextHook(() => {
             stopWatching();
         };
     }, [isAvailable, startWatching, stopWatching, stepGoal, currentSteps]);
-
-    // Check for midnight reset
-    useEffect(() => {
-        const checkMidnight = setInterval(async () => {
-            const stored = await AsyncStorage.getItem(STEP_STORAGE_KEY);
-            if (stored) {
-                const data: StepData = JSON.parse(stored);
-                const todayKey = getTodayKey();
-
-                if (data.date !== todayKey) {
-                    // Midnight passed - reset steps
-                    setCurrentSteps(0);
-                    baseStepsRef.current = 0;
-                    lastSensorValueRef.current = null;
-                    await saveData(0, null, stepGoal);
-                }
-            }
-        }, 60000); // Check every minute
-
-        return () => clearInterval(checkMidnight);
-    }, [stepGoal]);
 
     // Set step goal
     const setStepGoal = useCallback(async (goal: number) => {

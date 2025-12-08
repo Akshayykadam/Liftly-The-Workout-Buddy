@@ -9,6 +9,7 @@ const COLORS = {
     black: '#000000',
     surface: '#0F0F0F',
     textPrimary: '#FFFFFF',
+    accent: '#CCFF00',
     textSecondary: '#A0A0A0'
 };
 
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     },
     sectionSubtitle: {
         fontSize: 14,
-        color: COLORS.textSecondary,
+        color: COLORS.accent,
         marginBottom: 16
     },
     list: {

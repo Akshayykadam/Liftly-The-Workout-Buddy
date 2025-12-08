@@ -39,6 +39,7 @@ function NavigationController() {
       <Stack.Screen name="meditation/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="yoga/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
+      <Stack.Screen name="health" options={{ headerShown: false }} />
     </Stack>
   );
 }
