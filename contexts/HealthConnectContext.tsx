@@ -478,6 +478,20 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
         };
     }, [isInitialized, refreshData]);
 
+    // Poll for updates when app is active
+    useEffect(() => {
+        if (!isAndroidDevice || !isInitialized) return;
+
+        const interval = setInterval(() => {
+            // Only refresh if app is active
+            if (AppState.currentState === 'active') {
+                refreshData();
+            }
+        }, 15000); // 15 seconds
+
+        return () => clearInterval(interval);
+    }, [isAndroidDevice, isInitialized, refreshData]);
+
     return {
         // Status
         isAndroid: isAndroidDevice,

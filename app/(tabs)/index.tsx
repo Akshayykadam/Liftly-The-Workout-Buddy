@@ -1,7 +1,7 @@
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import * as Haptics from 'expo-haptics';
-import { Check, Flame, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, Moon, User, Heart } from 'lucide-react-native';
+import { Check, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, User, Heart } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import {
@@ -33,7 +33,7 @@ const COLORS = {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { currentDayNumber, currentWorkout, isExerciseCompleted, toggleCompletion, getTodayStats, streak, isRestDay } = useWorkout();
+  const { currentDayNumber, currentWorkout, isExerciseCompleted, toggleCompletion, getTodayStats, isRestDay } = useWorkout();
   const { dashboardData, stepGoal, stepProgress, isInitialized, isLoading, setStepGoal } = useHealthConnect();
 
   // Get step data from HealthConnectContext
@@ -131,10 +131,8 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Removed StepCounterCard */}
-
         {isRestDay ? (
-          <RestDayCard streak={streak} />
+          <RestDayCard />
         ) : (
           currentWorkout.exercises.map((exercise, index) => (
             <ExerciseCard
@@ -165,7 +163,6 @@ export default function HomeScreen() {
         visible={showCelebration !== null}
         type={showCelebration}
         onClose={() => setShowCelebration(null)}
-        streak={streak}
         stepsCompleted={currentSteps}
         stepGoal={stepGoal}
       />
@@ -173,18 +170,12 @@ export default function HomeScreen() {
   );
 }
 
-
-
 // Rest Day Card
-interface RestDayCardProps {
-  streak: number;
-}
-
-function RestDayCard({ streak }: RestDayCardProps) {
+function RestDayCard() {
   return (
     <View style={styles.restDayCard}>
       <View style={styles.restDayIconContainer}>
-        <Moon size={48} color={COLORS.accent} strokeWidth={1.5} />
+        <Check size={48} color={COLORS.accent} strokeWidth={1.5} />
       </View>
       <Text style={styles.restDayTitle}>Time to Recover!</Text>
       <Text style={styles.restDayMessage}>
@@ -298,12 +289,11 @@ interface CelebrationModalProps {
   visible: boolean;
   type: 'workout' | 'steps' | null;
   onClose: () => void;
-  streak: number;
-  stepsCompleted: number;
-  stepGoal: number;
+  stepsCompleted?: number;
+  stepGoal?: number;
 }
 
-function CelebrationModal({ visible, type, onClose, streak, stepsCompleted, stepGoal }: CelebrationModalProps) {
+function CelebrationModal({ visible, type, onClose, stepsCompleted = 0, stepGoal = 10000 }: CelebrationModalProps) {
   const insets = useSafeAreaInsets();
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;

@@ -40,7 +40,7 @@ const COLORS = {
     textSecondary: '#A0A0A0',
     border: '#1F1F1F',
     blue: '#3742FA',
-    red: '#EF4444',
+    red: '#EA4C89', // Matched with progress.tsx
     orange: '#F97316',
     purple: '#8B5CF6',
     green: '#22C55E',

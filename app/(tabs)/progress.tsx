@@ -40,8 +40,8 @@ const COLORS = {
     textPrimary: '#FFFFFF',
     textSecondary: '#A0A0A0',
     border: '#1F1F1F',
-    red: '#FF4757',
-    green: '#2ED573',
+    green: '#22C55E',
+    red: '#EA4C89', // Use same red as other screens if possible, or keep as pinkish for weight
     blue: '#3742FA'
 } as const;
 
