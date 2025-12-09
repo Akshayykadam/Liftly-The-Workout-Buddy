@@ -167,6 +167,50 @@ export const requestHealthPermissions = async (): Promise<PermissionStatus[]> =>
 };
 
 /**
+ * Get currently granted permissions
+ */
+export const getGrantedPermissions = async (): Promise<PermissionStatus[]> => {
+    if (!isAndroid()) return [];
+
+    try {
+        const { getGrantedPermissions } = await import('react-native-health-connect');
+        const granted = await getGrantedPermissions();
+
+        // Map the granted permissions to our format
+        const permissionMap: Record<string, HealthPermission> = {
+            'Steps': 'Steps',
+            'HeartRate': 'HeartRate',
+            'RestingHeartRate': 'RestingHeartRate',
+            'ExerciseSession': 'ExerciseSession',
+            'ActiveCaloriesBurned': 'ActiveCaloriesBurned',
+            'BasalMetabolicRate': 'BasalMetabolicRate',
+            'TotalCaloriesBurned': 'TotalCaloriesBurned',
+            'Weight': 'Weight',
+            'Height': 'Height',
+            'BodyFat': 'BodyFat',
+            'SleepSession': 'SleepSession',
+        };
+
+        const result: PermissionStatus[] = [];
+
+        for (const perm of granted) {
+            const mappedPerm = permissionMap[perm.recordType];
+            if (mappedPerm && !result.find(r => r.permission === mappedPerm)) {
+                result.push({
+                    permission: mappedPerm,
+                    granted: true,
+                });
+            }
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error getting granted permissions:', error);
+        return [];
+    }
+};
+
+/**
  * Open Health Connect settings
  */
 export const openSettings = async (): Promise<void> => {

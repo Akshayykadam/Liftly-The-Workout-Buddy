@@ -1,4 +1,5 @@
 import { useUser } from '@/contexts/UserContext';
+import { useHealthConnect } from '@/contexts/HealthConnectContext';
 
 import * as Haptics from 'expo-haptics';
 import {
@@ -9,7 +10,8 @@ import {
     Calendar,
     BarChart3,
     Plus,
-    Check
+    Check,
+    Footprints
 } from 'lucide-react-native';
 import React, { useState, useMemo } from 'react';
 import {
@@ -50,18 +52,15 @@ export default function ProgressScreen() {
         weightHistory,
         logWeight,
         getTodayWeight,
-        getWeightChange,
-        getWeeklyStats,
-        getMonthlyStats
+        getWeightChange
     } = useUser();
+
+    const { dashboardData } = useHealthConnect();
+    const stepsHistory = dashboardData?.steps?.weeklyData || [];
 
     const [showLogModal, setShowLogModal] = useState(false);
     const todayWeight = getTodayWeight();
     const weightChange = getWeightChange();
-    const weeklyStats = getWeeklyStats();
-    const monthlyStats = getMonthlyStats();
-
-
 
     const handleLogWeight = (weight: number) => {
         logWeight(weight);
@@ -155,7 +154,7 @@ export default function ProgressScreen() {
                     </View>
                 )}
 
-                {/* Weight Chart */}
+                {/* Weight Trend Chart */}
                 {weightHistory.length >= 2 && (
                     <View style={styles.chartCard}>
                         <View style={styles.chartHeader}>
@@ -166,71 +165,16 @@ export default function ProgressScreen() {
                     </View>
                 )}
 
-                {/* Weekly Report */}
-                {weeklyStats && (
-                    <View style={styles.reportCard}>
-                        <View style={styles.reportHeader}>
-                            <Calendar size={20} color={COLORS.blue} />
-                            <Text style={styles.reportTitle}>This Week</Text>
+                {/* Steps Trend Chart */}
+                {stepsHistory.length > 0 && (
+                    <View style={styles.chartCard}>
+                        <View style={styles.chartHeader}>
+                            <Footprints size={20} color={COLORS.blue} />
+                            <Text style={styles.chartTitle}>Steps Trend</Text>
                         </View>
-                        <View style={{ height: 150, alignItems: 'center', justifyContent: 'center' }}>
-                            {getWeekData().length > 1 ? (
-                                <WeightChart
-                                    data={getWeekData()}
-                                    unit={profile.weightUnit}
-                                    height={150}
-                                    width={SCREEN_WIDTH - 88} // padding adjustments
-                                    showGrid={false}
-                                />
-                            ) : (
-                                <Text style={styles.emptyDescription}>Not enough data for this week</Text>
-                            )}
-                        </View>
+                        <StepsChart data={stepsHistory} />
                     </View>
                 )}
-
-                {/* Monthly Report */}
-                {monthlyStats && (
-                    <View style={styles.reportCard}>
-                        <View style={styles.reportHeader}>
-                            <Calendar size={20} color={COLORS.green} />
-                            <Text style={styles.reportTitle}>This Month</Text>
-                            <View style={[styles.trendBadge, {
-                                backgroundColor: monthlyStats.trend === 'down' ? COLORS.green + '20' :
-                                    monthlyStats.trend === 'up' ? COLORS.red + '20' : COLORS.border
-                            }]}>
-                                {monthlyStats.trend === 'down' ? (
-                                    <TrendingDown size={14} color={COLORS.green} />
-                                ) : monthlyStats.trend === 'up' ? (
-                                    <TrendingUp size={14} color={COLORS.red} />
-                                ) : (
-                                    <Minus size={14} color={COLORS.textSecondary} />
-                                )}
-                                <Text style={[styles.trendText, {
-                                    color: monthlyStats.trend === 'down' ? COLORS.green :
-                                        monthlyStats.trend === 'up' ? COLORS.red : COLORS.textSecondary
-                                }]} >
-                                    {monthlyStats.trend === 'stable' ? 'Stable' : monthlyStats.trend === 'down' ? 'Losing' : 'Gaining'}
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={{ height: 150, alignItems: 'center', justifyContent: 'center' }}>
-                            {getMonthData().length > 1 ? (
-                                <WeightChart
-                                    data={getMonthData()}
-                                    unit={profile.weightUnit}
-                                    height={150}
-                                    width={SCREEN_WIDTH - 88}
-                                    showGrid={false}
-                                />
-                            ) : (
-                                <Text style={styles.emptyDescription}>Not enough data for this month</Text>
-                            )}
-                        </View>
-                    </View>
-                )}
-
-
 
                 {/* Empty State */}
                 {weightHistory.length < 2 && (
@@ -253,21 +197,143 @@ export default function ProgressScreen() {
             />
         </View>
     );
-
-    function getWeekData() {
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay() + (profile.startDayOfWeek === 1 ? 1 : 0)); // Adjust for start day
-        startOfWeek.setHours(0, 0, 0, 0);
-        return weightHistory.filter(d => new Date(d.date) >= startOfWeek);
-    }
-
-    function getMonthData() {
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        return weightHistory.filter(d => new Date(d.date) >= startOfMonth);
-    }
 }
+
+// Steps Chart Component
+function StepsChart({ data }: { data: Array<{ date: Date; steps: number; dayName: string }> }) {
+    const height = 150;
+    const width = CHART_WIDTH;
+    const chartPadding = { top: 20, bottom: 30, left: 35, right: 10 };
+
+    const chartData = useMemo(() => {
+        if (data.length === 0) return null;
+
+        const maxSteps = Math.max(...data.map(d => d.steps), 100);
+        // Add 20% breathing room to max
+        const yMax = Math.ceil(maxSteps * 1.2);
+        const yRange = yMax;
+
+        const chartInnerWidth = width - chartPadding.left - chartPadding.right;
+        const chartInnerHeight = height - chartPadding.top - chartPadding.bottom;
+
+        const points = data.map((d, i) => {
+            const x = chartPadding.left + (i / Math.max(data.length - 1, 1)) * chartInnerWidth;
+            const y = chartPadding.top + (1 - d.steps / yRange) * chartInnerHeight;
+            return { x, y, ...d };
+        });
+
+        // Build path
+        let path = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            path += ` L ${points[i].x} ${points[i].y}`;
+        }
+
+        // Build area path for gradient fill
+        const areaPath = path +
+            ` L ${points[points.length - 1].x} ${height - chartPadding.bottom}` +
+            ` L ${points[0].x} ${height - chartPadding.bottom} Z`;
+
+        return { points, path, areaPath, yMax, yRange };
+    }, [data, height, width, chartPadding]);
+
+    if (!chartData) return null;
+
+    // Y Axis Labels
+    const yLabels = useMemo(() => {
+        const count = 3;
+        const labels = [];
+        for (let i = 0; i <= count; i++) {
+            const value = Math.round(chartData.yMax * (i / count));
+            const y = height - chartPadding.bottom - (i / count) * (height - chartPadding.top - chartPadding.bottom);
+            labels.push({ value: value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value, y });
+        }
+        return labels;
+    }, [chartData, height, chartPadding]);
+
+    return (
+        <Svg width={width} height={height}>
+            <Defs>
+                <LinearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor={COLORS.blue} stopOpacity="0.3" />
+                    <Stop offset="100%" stopColor={COLORS.blue} stopOpacity="0" />
+                </LinearGradient>
+            </Defs>
+
+            {/* Grid lines */}
+            {yLabels.map((label, i) => (
+                <Line
+                    key={`grid-${i}`}
+                    x1={chartPadding.left}
+                    y1={label.y}
+                    x2={width - chartPadding.right}
+                    y2={label.y}
+                    stroke={COLORS.border}
+                    strokeWidth={1}
+                />
+            ))}
+
+            {/* Y axis labels */}
+            {yLabels.map((label, i) => (
+                <SvgText
+                    key={`ylabel-${i}`}
+                    x={chartPadding.left - 8}
+                    y={label.y + 4}
+                    fontSize={10}
+                    fill={COLORS.textSecondary}
+                    textAnchor="end"
+                >
+                    {label.value}
+                </SvgText>
+            ))}
+
+            {/* X axis labels */}
+            {chartData.points.map((point, i) => (
+                <SvgText
+                    key={`xlabel-${i}`}
+                    x={point.x}
+                    y={height - 10}
+                    fontSize={10}
+                    fill={i === chartData.points.length - 1 ? COLORS.textPrimary : COLORS.textSecondary}
+                    textAnchor="middle"
+                    fontWeight={i === chartData.points.length - 1 ? '700' : '400'}
+                >
+                    {point.dayName}
+                </SvgText>
+            ))}
+
+            {/* Area fill */}
+            <Path
+                d={chartData.areaPath}
+                fill="url(#stepsGradient)"
+            />
+
+            {/* Line */}
+            <Path
+                d={chartData.path}
+                stroke={COLORS.blue}
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
+            {/* Data points */}
+            {chartData.points.map((point, i) => (
+                <Circle
+                    key={`point-${i}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={i === chartData.points.length - 1 ? 5 : 3}
+                    fill={i === chartData.points.length - 1 ? COLORS.blue : COLORS.surface}
+                    stroke={COLORS.blue}
+                    strokeWidth={2}
+                />
+            ))}
+        </Svg>
+    );
+}
+
+// Weight Chart Component
 
 interface WeightChartProps {
     data: Array<{ date: string; weight: number; unit: string }>;

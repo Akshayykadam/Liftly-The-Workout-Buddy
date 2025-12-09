@@ -6,9 +6,10 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Platform, AppState, AppStateStatus } from 'react-native';
 import * as HealthConnectService from '@/services/healthConnect';
+import { useUser } from '@/contexts/UserContext';
 import type {
     HealthConnectStatus,
     HealthDashboardData,
@@ -60,6 +61,20 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
     const [error, setError] = useState<string | null>(null);
     const [permissions, setPermissions] = useState<PermissionStatus[]>([]);
     const [stepGoal, setStepGoalState] = useState(DEFAULT_STEP_GOAL);
+
+
+    const { profile, updateProfile, logWeight } = useUser();
+
+    // Refs to avoid stale closures in sync logic
+    const profileRef = useRef(profile);
+    const updateProfileRef = useRef(updateProfile);
+    const logWeightRef = useRef(logWeight);
+
+    useEffect(() => {
+        profileRef.current = profile;
+        updateProfileRef.current = updateProfile;
+        logWeightRef.current = logWeight;
+    }, [profile, updateProfile, logWeight]);
 
     const [dashboardData, setDashboardData] = useState<HealthDashboardData>({
         steps: null,
@@ -202,6 +217,11 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                     setIsInitialized(initialized);
 
                     if (initialized) {
+                        // Check for existing permissions
+                        const granted = await HealthConnectService.getGrantedPermissions();
+                        setPermissions(granted);
+                        console.log('[HealthConnect] Initialized with permissions:', granted.length);
+
                         // Refresh data after initialization
                         await refreshData();
                     }
@@ -302,6 +322,76 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 (sum, s) => sum + s.durationMinutes,
                 0
             );
+
+            // Sync body measurements to User Profile if available
+            if (Object.keys(bodyMeasurements).length > 0) {
+                console.log('[HealthConnect] Found body measurements to sync:', bodyMeasurements);
+
+                const updates: any = {};
+                let shouldUpdate = false;
+
+                // Use Refs to access latest user data without closure staleness
+                const currentProfile = profileRef.current;
+                const updateProfileFn = updateProfileRef.current;
+                const logWeightFn = logWeightRef.current;
+
+                if (!currentProfile || !updateProfileFn || !logWeightFn) {
+                    console.log('[HealthConnect] Profile or update functions not ready, skipping sync');
+                } else {
+                    console.log('[HealthConnect] Current profile weight/height:', currentProfile.weight, currentProfile.height);
+
+                    // Sync Weight
+                    if (bodyMeasurements.weight) {
+                        const hcWeightKg = bodyMeasurements.weight.value;
+                        const targetUnit = currentProfile.weightUnit; // 'kg' or 'lbs'
+                        let finalWeight = hcWeightKg;
+
+                        if (targetUnit === 'lbs') {
+                            finalWeight = hcWeightKg * 2.20462262;
+                        }
+
+                        // Round to 1 decimal place
+                        finalWeight = Math.round(finalWeight * 10) / 10;
+                        console.log(`[HealthConnect] Weight sync: HC=${hcWeightKg}kg -> Final=${finalWeight}${targetUnit} (Current=${currentProfile.weight})`);
+
+                        if (Math.abs(currentProfile.weight - finalWeight) > 0.1) {
+                            // Use logWeight to ensure it updates history and charts, not just profile
+                            console.log('[HealthConnect] Weight update scheduled (via logWeight)');
+                            logWeightFn(finalWeight);
+                        }
+                    }
+
+                    // Sync Height
+                    if (bodyMeasurements.height) {
+                        const hcHeightCm = bodyMeasurements.height.value;
+                        const targetUnit = currentProfile.heightUnit; // 'cm' or 'ft'
+                        let finalHeight = hcHeightCm;
+
+                        if (targetUnit === 'ft') {
+                            finalHeight = hcHeightCm * 0.0328084;
+                        }
+
+                        const precision = targetUnit === 'ft' ? 100 : 10;
+                        finalHeight = Math.round(finalHeight * precision) / precision;
+                        console.log(`[HealthConnect] Height sync: HC=${hcHeightCm}cm -> Final=${finalHeight}${targetUnit} (Current=${currentProfile.height})`);
+
+                        if (Math.abs(currentProfile.height - finalHeight) > 0.05) {
+                            updates.height = finalHeight;
+                            shouldUpdate = true;
+                            console.log('[HealthConnect] Height update scheduled');
+                        }
+                    }
+
+                    if (shouldUpdate) {
+                        console.log('[HealthConnect] Applying profile updates (Height/Other):', updates);
+                        updateProfileFn(updates);
+                    } else {
+                        console.log('[HealthConnect] No updates required (values match)');
+                    }
+                }
+            } else {
+                console.log('[HealthConnect] No body measurements found in Health Connect');
+            }
 
             setDashboardData({
                 steps: {

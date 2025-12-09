@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -28,7 +28,7 @@ import {
 } from 'lucide-react-native';
 import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import { HealthPermissionsModal } from '@/components/HealthPermissionsModal';
-import Svg, { Circle, Rect } from 'react-native-svg';
+import Svg, { Circle, Rect, Path, Defs, LinearGradient, Stop, Line, Text as SvgText } from 'react-native-svg';
 import type { ExerciseSession, SleepStage } from '@/types/healthTypes';
 
 const COLORS = {
@@ -260,43 +260,7 @@ export default function HealthScreen() {
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>Last 7 Days</Text>
                                 <View style={styles.chartContainer}>
-                                    <Svg width={SCREEN_WIDTH - 72} height={120}>
-                                        {weeklyData.map((day, index) => {
-                                            const barWidth = (SCREEN_WIDTH - 112) / 7 - 6;
-                                            const barMaxHeight = 90;
-                                            const barHeight = maxSteps > 0
-                                                ? (day.steps / maxSteps) * barMaxHeight
-                                                : 0;
-                                            const x = index * ((SCREEN_WIDTH - 112) / 7) + 12;
-                                            const isToday = index === 6;
-
-                                            return (
-                                                <React.Fragment key={index}>
-                                                    <Rect
-                                                        x={x}
-                                                        y={100 - barHeight}
-                                                        width={barWidth}
-                                                        height={Math.max(barHeight, 4)}
-                                                        rx={4}
-                                                        fill={isToday ? COLORS.accent : COLORS.surfaceLight}
-                                                    />
-                                                </React.Fragment>
-                                            );
-                                        })}
-                                    </Svg>
-                                    <View style={styles.chartLabels}>
-                                        {weeklyData.map((day, index) => (
-                                            <Text
-                                                key={index}
-                                                style={[
-                                                    styles.chartLabel,
-                                                    index === 6 && styles.chartLabelActive
-                                                ]}
-                                            >
-                                                {day.dayName}
-                                            </Text>
-                                        ))}
-                                    </View>
+                                    <StepsLineChart data={weeklyData} />
                                 </View>
                             </View>
                         )}
@@ -484,11 +448,42 @@ const SleepCard: React.FC<{ session: { durationMinutes: number; startTime: strin
     const hours = Math.floor(session.durationMinutes / 60);
     const mins = session.durationMinutes % 60;
 
-    // Calculate stage durations
-    const stageDurations = session.stages?.reduce((acc, stage) => {
+    // Process stages to fill gaps and sort
+    const stages = session.stages ? [...session.stages].sort((a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    ) : [];
+
+    const sessionStart = new Date(session.startTime).getTime();
+    const sessionEnd = new Date(session.endTime).getTime();
+    const totalDurationMs = sessionEnd - sessionStart;
+
+    // Calculate aggregatedstats
+    const stageDurations = stages.reduce((acc, stage) => {
         acc[stage.stage] = (acc[stage.stage] || 0) + stage.durationMinutes;
         return acc;
-    }, {} as Record<string, number>) || {};
+    }, {} as Record<string, number>);
+
+    const getStageColor = (stage: string) => {
+        switch (stage) {
+            case 'DEEP': return '#3B82F6'; // Blue
+            case 'LIGHT': return '#93C5FD'; // Light Blue
+            case 'REM': return COLORS.purple; // Purple
+            case 'AWAKE':
+            case 'OUT_OF_BED': return COLORS.orange; // Orange
+            default: return COLORS.surfaceLight;
+        }
+    };
+
+    const getStageLabel = (stage: string) => {
+        switch (stage) {
+            case 'DEEP': return 'Deep';
+            case 'LIGHT': return 'Light';
+            case 'REM': return 'REM';
+            case 'AWAKE':
+            case 'OUT_OF_BED': return 'Awake';
+            default: return 'Other';
+        }
+    };
 
     return (
         <View style={styles.sleepCard}>
@@ -501,39 +496,199 @@ const SleepCard: React.FC<{ session: { durationMinutes: number; startTime: strin
                     </Text>
                 </View>
             </View>
+
+            {/* Timeline Visualization */}
+            {stages.length > 0 && totalDurationMs > 0 && (
+                <View style={{ marginTop: 24, marginBottom: 8 }}>
+                    <Text style={styles.chartTitle}>Sleep Stages</Text>
+                    <View style={{ height: 24, borderRadius: 12, backgroundColor: COLORS.surfaceLight, flexDirection: 'row', overflow: 'hidden', width: '100%' }}>
+                        {stages.map((stage, index) => {
+                            const start = new Date(stage.startTime).getTime();
+                            const end = new Date(stage.endTime).getTime();
+                            const duration = end - start;
+
+                            // Calculate position and width
+                            const left = ((start - sessionStart) / totalDurationMs) * 100;
+                            const width = (duration / totalDurationMs) * 100;
+
+                            return (
+                                <View
+                                    key={index}
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${left}%`,
+                                        width: `${width}%`,
+                                        height: '100%',
+                                        backgroundColor: getStageColor(stage.stage),
+                                        borderRightWidth: 1,
+                                        borderColor: COLORS.surface
+                                    }}
+                                />
+                            );
+                        })}
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                        <Text style={styles.axisLabel}>{formatTime(session.startTime)}</Text>
+                        <Text style={styles.axisLabel}>{formatTime(session.endTime)}</Text>
+                    </View>
+                </View>
+            )}
+
+            {/* Detailed Stats */}
             {Object.keys(stageDurations).length > 0 && (
                 <View style={styles.sleepStages}>
-                    {stageDurations.DEEP && (
-                        <View style={styles.sleepStage}>
-                            <View style={[styles.stageIndicator, { backgroundColor: '#3B82F6' }]} />
-                            <Text style={styles.stageLabel}>Deep</Text>
-                            <Text style={styles.stageDuration}>{formatDuration(stageDurations.DEEP)}</Text>
-                        </View>
-                    )}
-                    {stageDurations.LIGHT && (
-                        <View style={styles.sleepStage}>
-                            <View style={[styles.stageIndicator, { backgroundColor: '#60A5FA' }]} />
-                            <Text style={styles.stageLabel}>Light</Text>
-                            <Text style={styles.stageDuration}>{formatDuration(stageDurations.LIGHT)}</Text>
-                        </View>
-                    )}
-                    {stageDurations.REM && (
-                        <View style={styles.sleepStage}>
-                            <View style={[styles.stageIndicator, { backgroundColor: COLORS.purple }]} />
-                            <Text style={styles.stageLabel}>REM</Text>
-                            <Text style={styles.stageDuration}>{formatDuration(stageDurations.REM)}</Text>
-                        </View>
-                    )}
-                    {stageDurations.AWAKE && (
-                        <View style={styles.sleepStage}>
-                            <View style={[styles.stageIndicator, { backgroundColor: COLORS.orange }]} />
-                            <Text style={styles.stageLabel}>Awake</Text>
-                            <Text style={styles.stageDuration}>{formatDuration(stageDurations.AWAKE)}</Text>
-                        </View>
-                    )}
+                    {['AWAKE', 'REM', 'LIGHT', 'DEEP'].map((stageType) => {
+                        const duration = stageDurations[stageType] || 0;
+                        if (duration === 0) return null;
+
+                        const percent = Math.round((duration / session.durationMinutes) * 100);
+
+                        return (
+                            <View key={stageType} style={styles.sleepStageItem}>
+                                <View style={[styles.stageIndicator, { backgroundColor: getStageColor(stageType) }]} />
+                                <View>
+                                    <Text style={styles.stageLabel}>{getStageLabel(stageType)}</Text>
+                                    <Text style={styles.stageDuration}>{formatDuration(duration)} <Text style={{ color: COLORS.textSecondary, fontWeight: '400' }}>({percent}%)</Text></Text>
+                                </View>
+                            </View>
+                        );
+                    })}
                 </View>
             )}
         </View>
+    );
+};
+
+const StepsLineChart = ({ data }: { data: Array<{ date: Date; steps: number; dayName: string }> }) => {
+    const height = 150;
+    const width = SCREEN_WIDTH - 72;
+    const chartPadding = { top: 20, bottom: 30, left: 35, right: 10 };
+
+    const chartData = useMemo(() => {
+        if (data.length === 0) return null;
+
+        const maxSteps = Math.max(...data.map(d => d.steps), 100);
+        // Add 20% breathing room to max
+        const yMax = Math.ceil(maxSteps * 1.2);
+        const yRange = yMax;
+
+        const chartInnerWidth = width - chartPadding.left - chartPadding.right;
+        const chartInnerHeight = height - chartPadding.top - chartPadding.bottom;
+
+        const points = data.map((d, i) => {
+            const x = chartPadding.left + (i / Math.max(data.length - 1, 1)) * chartInnerWidth;
+            const y = chartPadding.top + (1 - d.steps / yRange) * chartInnerHeight;
+            return { x, y, ...d };
+        });
+
+        // Build path
+        let path = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            path += ` L ${points[i].x} ${points[i].y}`;
+        }
+
+        // Build area path for gradient fill
+        const areaPath = path +
+            ` L ${points[points.length - 1].x} ${height - chartPadding.bottom}` +
+            ` L ${points[0].x} ${height - chartPadding.bottom} Z`;
+
+        return { points, path, areaPath, yMax, yRange };
+    }, [data, height, width, chartPadding]);
+
+    if (!chartData) return null;
+
+    // Y Axis Labels
+    const yLabels = useMemo(() => {
+        const count = 3;
+        const labels = [];
+        for (let i = 0; i <= count; i++) {
+            const value = Math.round(chartData.yMax * (i / count));
+            const y = height - chartPadding.bottom - (i / count) * (height - chartPadding.top - chartPadding.bottom);
+            labels.push({ value: value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value, y });
+        }
+        return labels;
+    }, [chartData, height, chartPadding]);
+
+    return (
+        <Svg width={width} height={height}>
+            <Defs>
+                <LinearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor={COLORS.blue} stopOpacity="0.3" />
+                    <Stop offset="100%" stopColor={COLORS.blue} stopOpacity="0" />
+                </LinearGradient>
+            </Defs>
+
+            {/* Grid lines */}
+            {yLabels.map((label, i) => (
+                <Line
+                    key={`grid-${i}`}
+                    x1={chartPadding.left}
+                    y1={label.y}
+                    x2={width - chartPadding.right}
+                    y2={label.y}
+                    stroke={COLORS.border}
+                    strokeWidth={1}
+                />
+            ))}
+
+            {/* Y axis labels */}
+            {yLabels.map((label, i) => (
+                <SvgText
+                    key={`ylabel-${i}`}
+                    x={chartPadding.left - 8}
+                    y={label.y + 4}
+                    fontSize={10}
+                    fill={COLORS.textSecondary}
+                    textAnchor="end"
+                >
+                    {label.value}
+                </SvgText>
+            ))}
+
+            {/* X axis labels */}
+            {chartData.points.map((point, i) => (
+                <SvgText
+                    key={`xlabel-${i}`}
+                    x={point.x}
+                    y={height - 10}
+                    fontSize={10}
+                    fill={i === chartData.points.length - 1 ? COLORS.textPrimary : COLORS.textSecondary}
+                    textAnchor="middle"
+                    fontWeight={i === chartData.points.length - 1 ? '700' : '400'}
+                >
+                    {point.dayName}
+                </SvgText>
+            ))}
+
+            {/* Area fill */}
+            <Path
+                d={chartData.areaPath}
+                fill="url(#stepsGradient)"
+            />
+
+            {/* Line */}
+            <Path
+                d={chartData.path}
+                stroke={COLORS.blue}
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
+            {/* Data points */}
+            {chartData.points.map((point, i) => (
+                <Circle
+                    key={`point-${i}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={i === chartData.points.length - 1 ? 5 : 3}
+                    fill={i === chartData.points.length - 1 ? COLORS.blue : COLORS.surface}
+                    stroke={COLORS.blue}
+                    strokeWidth={2}
+                />
+            ))}
+        </Svg>
     );
 };
 
@@ -922,4 +1077,21 @@ const styles = StyleSheet.create({
     breakdownPercentComplete: {
         color: COLORS.accent,
     },
+    chartTitle: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: COLORS.textSecondary,
+        marginBottom: 8,
+    },
+    axisLabel: {
+        fontSize: 10,
+        color: COLORS.textSecondary,
+    },
+    sleepStageItem: {
+        width: '48%', // 2 columns
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 8,
+    }
 });
