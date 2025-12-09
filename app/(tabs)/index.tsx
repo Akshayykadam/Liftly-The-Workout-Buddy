@@ -72,7 +72,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: COLORS.black }]}>
-      <View style={{ paddingTop: insets.top + 16 }}>
+      <View style={{ paddingTop: insets.top + 16, paddingBottom: 24 }}>
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Today&apos;s Workout</Text>
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 24
+    paddingTop: 12
   },
   card: {
     backgroundColor: COLORS.surface,

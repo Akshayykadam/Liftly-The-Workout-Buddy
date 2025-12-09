@@ -25,11 +25,9 @@ export default function ExerciseDetailScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <View style={{ width: 40 }} />
+
                 <Text style={styles.headerTitle}>Exercise Details</Text>
-                <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-                    <X size={24} color={COLORS.textSecondary} />
-                </TouchableOpacity>
+
             </View>
 
             <View style={styles.contentContainer}>
@@ -117,7 +115,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderBottomWidth: 1,

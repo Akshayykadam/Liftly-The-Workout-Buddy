@@ -25,11 +25,9 @@ export default function YogaScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-                    <X size={24} color={COLORS.textSecondary} />
-                </TouchableOpacity>
+
                 <Text style={styles.headerTitle}>Yoga Flow</Text>
-                <View style={{ width: 40 }} />
+
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -117,7 +115,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderBottomWidth: 1,
