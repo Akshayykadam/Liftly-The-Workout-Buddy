@@ -1,55 +1,61 @@
 # Liftly - Workout & Wellness Tracker
 
-Liftly is a comprehensive React Native mobile application designed to help you track your fitness journey, from strength training to mindfulness.
+Liftly is a premium, comprehensive React Native mobile application designed to help you track your fitness journey, from strength training to mindfulness, with seamless Health Connect integration.
 
 ## Features
 
 ### 🏋️‍♂️ Smart Workout Tracking
 - **Structured Programs**: 6-day workout cycles tailored to 3 difficulty levels (Beginner, Intermediate, Advanced).
-- **Exercise Management**: Detailed exercise lists with sets, reps, and muscle targeting.
-- **Schedule Manager**: View your upcoming workout plan and track completions.
+- **Exercise Management**: Detailed exercise lists with sets, reps, muscle targeting, and "How to View" guides.
+- **Smart Completion**: Track exercise progress with haptic feedback and visual completion rings.
+- **Rest Day Management**: Dedicated rest day interface with recovery tips.
 
 ### 🧘 Mind & Body
 - **Yoga Routines**: Guided sessions for mobility, flexibility, and relaxation (e.g., Neck Release, Hip Flow, Desk Detox).
 - **Meditation**: Timed breathing exercises and meditation sessions for focus and sleep.
 
 ### 📊 Visual Progress Analytics
-- **Weight Tracking**: Log daily weight and track changes over time.
-- **Interactive Charts**: Visualize weekly and monthly progress trends with dynamic graphs.
-- **Stats Overview**: Monitor average, minimum, and maximum weight stats.
+- **Heart Rate Trends**: Interactive line charts visualizing daily min, max, and resting heart rate history.
+- **Step Tracking**: Real-time step counting with daily goals and progress rings.
+- **Sleep Analysis**: Deep dive into sleep stages (Deep, Light, REM) and duration trends.
+- **Weight Tracking**: Log daily weight and track changes over time with trend lines.
 
-### 🏥 Life Profile & Health Connect
-- **Comprehensive Health Dashboard**: A dedicated view for all your vital stats.
-- **Platform Integration**: Seamlessly syncs with **Android Health Connect**.
-- **Metrics Tracked**:
-  - Total Calories Burned (Active + Resting)
-  - Sleep Duration & Sessions
-  - Heart Rate Monitoring
-  - Distance Covered
-  - Hydration Logging
-  - Body Metrics (Weight, Height, BMI)
+### 🏥 Advanced Health Connect Integration
+- **Real-Time Sync**: Background polling ensures your steps and health data are always up-to-date.
+- **Platform Native**: Direct integration with **Android Health Connect** for privacy-focused data access.
+- **Comprehensive Metrics**:
+  - Heart Rate (Resting & Active)
+  - Sleep Quality & Duration
+  - Total Calories Burned
+  - Distance & Activity
+  - Body Measurements (Weight, Height)
 
-### 👤 Personalization
-- **Profile Management**: Customizable profile with BMI calculation and goal setting.
-- **Smart Reminders**: Flexible notification system for workout reminders (by day and time).
-- **Step Tracking**: Visual daily step goals with progress rings.
+### 👤 Personalization & UI
+- **Premium Design**: Sleek dark mode interface with consistent color theory (Accent Green/Red).
+- **Profile Management**: Customizable profile with automatic BMI calculation.
+- **Smart Reminders**: Flexible notification system for workout reminders.
+- **Interactive Modals**: Polished animations for goal setting and achievements.
 
 ## Tech Stack
 
-- **Framework**: React Native with Expo (SDK 50+)
+- **Framework**: React Native with Expo (Dev Client)
 - **Language**: TypeScript
 - **Navigation**: Expo Router (v3)
 - **State Management**: React Context & Hooks
-- **UI Components**: Custom components with `react-native-svg` for charts and `lucide-react-native` for iconography.
-- **Persistence**: AsyncStorage for local data saving.
-- **Health**: `react-native-health-connect` for Android Health Connect integration.
+- **UI Components**: 
+  - Custom components with `react-native-svg` for complex charts.
+  - `lucide-react-native` for consistent iconography.
+  - Polished with `react-native-reanimated`.
+- **Health**: `react-native-health-connect` (Android)
 - **Haptics**: `expo-haptics` for tactile feedback.
+- **Persistence**: AsyncStorage for local data saving.
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
-- npm or bun
+- Android Studio (for Emulator/Device testing)
+- Java 17 (Required for Health Connect builds)
 
 ### Installation
 
@@ -62,11 +68,6 @@ Liftly is a comprehensive React Native mobile application designed to help you t
 2. Install dependencies:
    ```bash
    npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
    ```
 
 ### Running on Device (Development Build)
@@ -90,18 +91,16 @@ npm install -g eas-cli
 
 # Build for Android (APK)
 eas build --platform android --profile production
-
-# Build for iOS (IPA)
-eas build --platform ios --profile production
 ```
 
 ## Project Structure
 
-- `app/`: Expo Router pages and layouts
-- `components/`: Reusable UI components (Cards, Modals, Charts)
-- `constants/`: Configuration, workout data, and color themes
-- `contexts/`: Global state management (User, Workout, HealthConnect)
-- `utils/`: Helper functions and notifications logic
+- `app/`: Expo Router pages (Tabs: Index, Progress, Health)
+- `components/`: Reusable UI components (Charts, Modals, Cards)
+- `constants/`: Workouts, Exercises, and Theme Colors
+- `contexts/`: Global state (User, Workout, HealthConnect)
+- `services/`: Health Connect and Notification services
+- `types/`: TypeScript definitions for Health and Workout data
 
 ---
 

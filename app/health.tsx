@@ -1007,17 +1007,22 @@ const styles = StyleSheet.create({
     },
     heartRateMain: {
         flexDirection: 'row',
-        alignItems: 'baseline',
-        gap: 10,
+        alignItems: 'center',
+        gap: 12,
     },
     heartRateValue: {
-        fontSize: 36,
+        fontSize: 42,
         fontWeight: '700',
         color: COLORS.textPrimary,
+        includeFontPadding: false,
     },
     heartRateUnit: {
         fontSize: 16,
         color: COLORS.textSecondary,
+        fontWeight: '600',
+        marginBottom: -6, // Align closer to baseline visually
+        alignSelf: 'flex-end',
+        paddingBottom: 8,
     },
     heartRateResting: {
         alignItems: 'flex-end',
