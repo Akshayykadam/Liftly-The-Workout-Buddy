@@ -286,6 +286,11 @@ export default function HealthScreen() {
                                         </View>
                                     )}
                                 </View>
+                                {heartRateData.history && heartRateData.history.length > 0 && (
+                                    <View style={[styles.chartContainer, { marginTop: 12 }]}>
+                                        <HeartRateLineChart data={heartRateData.history} />
+                                    </View>
+                                )}
                             </View>
                         )}
 
@@ -685,6 +690,146 @@ const StepsLineChart = ({ data }: { data: Array<{ date: Date; steps: number; day
                     r={i === chartData.points.length - 1 ? 5 : 3}
                     fill={i === chartData.points.length - 1 ? COLORS.blue : COLORS.surface}
                     stroke={COLORS.blue}
+                    strokeWidth={2}
+                />
+            ))}
+        </Svg>
+    );
+};
+
+const HeartRateLineChart = ({ data }: { data: Array<{ date: Date; min: number; max: number; avg: number }> }) => {
+    const height = 150;
+    const width = SCREEN_WIDTH - 72;
+    const chartPadding = { top: 20, bottom: 30, left: 35, right: 10 };
+
+    const chartData = useMemo(() => {
+        if (data.length === 0) return null;
+
+        // Calculate Y axis range based on min/max heart rate
+        const allMins = data.map(d => d.min);
+        const allMaxs = data.map(d => d.max);
+        const minVal = Math.min(...allMins);
+        const maxVal = Math.max(...allMaxs);
+
+        // Add padding to range
+        const yMin = Math.max(0, minVal - 10);
+        const yMax = maxVal + 10;
+        const yRange = yMax - yMin || 1; // Prevent division by zero
+
+        const chartInnerWidth = width - chartPadding.left - chartPadding.right;
+        const chartInnerHeight = height - chartPadding.top - chartPadding.bottom;
+
+        const points = data.map((d, i) => {
+            const x = chartPadding.left + (i / Math.max(data.length - 1, 1)) * chartInnerWidth;
+            const y = chartPadding.top + (1 - (d.avg - yMin) / yRange) * chartInnerHeight;
+            const dayName = d.date.toLocaleDateString('en-US', { weekday: 'short' });
+            return { x, y, dayName, ...d };
+        });
+
+        // Build path
+        let path = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            path += ` L ${points[i].x} ${points[i].y}`;
+        }
+
+        // Build area path for gradient fill
+        const areaPath = path +
+            ` L ${points[points.length - 1].x} ${height - chartPadding.bottom}` +
+            ` L ${points[0].x} ${height - chartPadding.bottom} Z`;
+
+        return { points, path, areaPath, yMax, yMin, yRange };
+    }, [data, height, width, chartPadding]);
+
+    if (!chartData) return null;
+
+    // Y Axis Labels
+    const yLabels = useMemo(() => {
+        const count = 3;
+        const labels = [];
+        for (let i = 0; i <= count; i++) {
+            const value = Math.round(chartData.yMin + (i / count) * chartData.yRange);
+            const y = height - chartPadding.bottom - (i / count) * (height - chartPadding.top - chartPadding.bottom);
+            labels.push({ value, y });
+        }
+        return labels;
+    }, [chartData, height, chartPadding]);
+
+    return (
+        <Svg width={width} height={height}>
+            <Defs>
+                <LinearGradient id="heartRateGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor={COLORS.red} stopOpacity="0.3" />
+                    <Stop offset="100%" stopColor={COLORS.red} stopOpacity="0" />
+                </LinearGradient>
+            </Defs>
+
+            {/* Grid lines */}
+            {yLabels.map((label, i) => (
+                <Line
+                    key={`grid-${i}`}
+                    x1={chartPadding.left}
+                    y1={label.y}
+                    x2={width - chartPadding.right}
+                    y2={label.y}
+                    stroke={COLORS.border}
+                    strokeWidth={1}
+                />
+            ))}
+
+            {/* Y axis labels */}
+            {yLabels.map((label, i) => (
+                <SvgText
+                    key={`ylabel-${i}`}
+                    x={chartPadding.left - 8}
+                    y={label.y + 4}
+                    fontSize={10}
+                    fill={COLORS.textSecondary}
+                    textAnchor="end"
+                >
+                    {label.value}
+                </SvgText>
+            ))}
+
+            {/* X axis labels */}
+            {chartData.points.map((point, i) => (
+                <SvgText
+                    key={`xlabel-${i}`}
+                    x={point.x}
+                    y={height - 10}
+                    fontSize={10}
+                    fill={i === chartData.points.length - 1 ? COLORS.textPrimary : COLORS.textSecondary}
+                    textAnchor="middle"
+                    fontWeight={i === chartData.points.length - 1 ? '700' : '400'}
+                >
+                    {point.dayName}
+                </SvgText>
+            ))}
+
+            {/* Area fill */}
+            <Path
+                d={chartData.areaPath}
+                fill="url(#heartRateGradient)"
+            />
+
+            {/* Line */}
+            <Path
+                d={chartData.path}
+                stroke={COLORS.red}
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
+            {/* Data points */}
+            {chartData.points.map((point, i) => (
+                <Circle
+                    key={`point-${i}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={i === chartData.points.length - 1 ? 5 : 3}
+                    fill={i === chartData.points.length - 1 ? COLORS.red : COLORS.surface}
+                    stroke={COLORS.red}
                     strokeWidth={2}
                 />
             ))}

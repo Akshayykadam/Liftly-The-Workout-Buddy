@@ -520,7 +520,7 @@ function ExerciseDetailModal({ exercise, visible, onClose }: ExerciseDetailModal
           </ScrollView>
 
           <TouchableOpacity
-            style={styles.closeButton}
+            style={[styles.closeButton, { marginBottom: insets.bottom + 20 }]}
             onPress={onClose}
             activeOpacity={0.8}
           >

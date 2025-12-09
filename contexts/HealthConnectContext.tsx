@@ -293,7 +293,7 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 todaySteps,
                 weeklySteps,
                 exerciseSessions,
-                latestHeartRate,
+                heartRateData,
                 restingHeartRate,
                 calories,
                 bodyMeasurements,
@@ -302,7 +302,8 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 HealthConnectService.getTodaySteps(),
                 HealthConnectService.getWeeklySteps(),
                 HealthConnectService.getExerciseSessions(weekAgo, now),
-                HealthConnectService.getLatestHeartRate(),
+                // Fetch heart rate (last 7 days for history)
+                HealthConnectService.getHeartRate(weekAgo, now),
                 HealthConnectService.getRestingHeartRate(),
                 HealthConnectService.getTodayCalories(),
                 HealthConnectService.getBodyMeasurements(),
@@ -400,11 +401,12 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                     weeklyTotal,
                     weeklyAverage,
                 },
-                heartRate: latestHeartRate || restingHeartRate
+                heartRate: heartRateData || restingHeartRate
                     ? {
-                        current: latestHeartRate ?? undefined,
+                        current: heartRateData?.samples?.[0]?.beatsPerMinute, // Most recent sample
                         resting: restingHeartRate?.beatsPerMinute,
-                        lastUpdated: restingHeartRate?.time,
+                        history: heartRateData?.history,
+                        lastUpdated: heartRateData?.samples?.[0]?.time || restingHeartRate?.time,
                     }
                     : null,
                 calories: calories

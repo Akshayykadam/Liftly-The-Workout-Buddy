@@ -55,6 +55,7 @@ export interface HeartRateData {
     averageBpm?: number;
     minBpm?: number;
     maxBpm?: number;
+    history?: { date: Date; min: number; max: number; avg: number }[];
 }
 
 export interface RestingHeartRateData {
@@ -150,6 +151,7 @@ export interface HealthDashboardData {
     heartRate: {
         current?: number;
         resting?: number;
+        history?: { date: Date; min: number; max: number; avg: number }[];
         lastUpdated?: string;
     } | null;
     calories: {

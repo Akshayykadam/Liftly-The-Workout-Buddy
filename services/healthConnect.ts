@@ -386,6 +386,7 @@ export const getHeartRate = async (
     if (!isAndroid()) return null;
 
     try {
+        // Fetch heart rate records
         const { records } = await readRecords('HeartRate', {
             timeRangeFilter: {
                 operator: 'between',
@@ -410,11 +411,42 @@ export const getHeartRate = async (
         const minBpm = Math.min(...bpmValues);
         const maxBpm = Math.max(...bpmValues);
 
+        // Calculate daily history for the last 7 days
+        const history: { date: Date; min: number; max: number; avg: number }[] = [];
+        const dayMap = new Map<string, number[]>();
+
+        samples.forEach(sample => {
+            const dateStr = new Date(sample.time).toISOString().split('T')[0];
+            if (!dayMap.has(dateStr)) {
+                dayMap.set(dateStr, []);
+            }
+            dayMap.get(dateStr)?.push(sample.beatsPerMinute);
+        });
+
+        // Get last 7 days keys and sort
+        const sortedDates = Array.from(dayMap.keys()).sort();
+
+        sortedDates.forEach(dateStr => {
+            const values = dayMap.get(dateStr) || [];
+            if (values.length > 0) {
+                const dayAvg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                const dayMin = Math.min(...values);
+                const dayMax = Math.max(...values);
+                history.push({
+                    date: new Date(dateStr),
+                    min: dayMin,
+                    max: dayMax,
+                    avg: dayAvg
+                });
+            }
+        });
+
         return {
             samples,
             averageBpm,
             minBpm,
             maxBpm,
+            history
         };
     } catch (error) {
         console.error('Error fetching heart rate:', error);
