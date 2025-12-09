@@ -97,13 +97,19 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
+          <TouchableOpacity
+            style={styles.statCard}
+            onPress={() => setShowGoalModal(true)}
+            activeOpacity={0.7}
+          >
             <View style={styles.statIconContainer}>
-              <Flame size={24} color={COLORS.accent} strokeWidth={2.5} />
+              <Footprints size={24} color={COLORS.accent} strokeWidth={2.5} />
             </View>
-            <Text style={styles.statValue}>{streak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
-          </View>
+            <Text style={styles.statValue}>
+              {currentSteps >= 1000 ? `${(currentSteps / 1000).toFixed(1)}k` : currentSteps}
+            </Text>
+            <Text style={styles.statLabel}>Steps</Text>
+          </TouchableOpacity>
 
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
@@ -125,15 +131,7 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Step Counter Card */}
-        <StepCounterCard
-          currentSteps={currentSteps}
-          stepGoal={stepGoal}
-          progress={stepProgress}
-          isAvailable={isAvailable}
-          isLoading={isLoading}
-          onEditGoal={() => setShowGoalModal(true)}
-        />
+        {/* Removed StepCounterCard */}
 
         {isRestDay ? (
           <RestDayCard streak={streak} />
@@ -175,106 +173,7 @@ export default function HomeScreen() {
   );
 }
 
-// Step Counter Card Component
-interface StepCounterCardProps {
-  currentSteps: number;
-  stepGoal: number;
-  progress: number;
-  isAvailable: boolean | null;
-  isLoading: boolean;
-  onEditGoal: () => void;
-}
 
-function StepCounterCard({ currentSteps, stepGoal, progress, isAvailable, isLoading, onEditGoal }: StepCounterCardProps) {
-  const size = 120;
-  const strokeWidth = 10;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (Math.min(progress, 100) / 100) * circumference;
-
-  if (isLoading || isAvailable === null) {
-    return (
-      <View style={styles.stepCard}>
-        <View style={styles.stepCardHeader}>
-          <Footprints size={24} color={COLORS.accent} />
-          <Text style={styles.stepCardTitle}>Daily Steps</Text>
-        </View>
-        <Text style={styles.stepCardLoading}>Loading step data...</Text>
-      </View>
-    );
-  }
-
-  if (!isAvailable) {
-    return (
-      <View style={styles.stepCard}>
-        <View style={styles.stepCardHeader}>
-          <Footprints size={24} color={COLORS.textSecondary} />
-          <Text style={styles.stepCardTitle}>Daily Steps</Text>
-        </View>
-        <Text style={styles.stepCardUnavailable}>
-          Step tracking requires a device with a built-in step counter sensor.
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <TouchableOpacity style={styles.stepCard} onPress={onEditGoal} activeOpacity={0.8}>
-      <View style={styles.stepCardHeader}>
-        <Footprints size={24} color={COLORS.accent} />
-        <Text style={styles.stepCardTitle}>Daily Steps</Text>
-        <ChevronRight size={20} color={COLORS.textSecondary} />
-      </View>
-
-      <View style={styles.stepCardContent}>
-        <View style={styles.progressRingContainer}>
-          <Svg width={size} height={size}>
-            <Circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={COLORS.border}
-              strokeWidth={strokeWidth}
-              fill="none"
-            />
-            <Circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={COLORS.accent}
-              strokeWidth={strokeWidth}
-              fill="none"
-              strokeDasharray={`${circumference} ${circumference}`}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              rotation="-90"
-              origin={`${size / 2}, ${size / 2}`}
-            />
-          </Svg>
-          <View style={styles.progressRingCenter}>
-            <Text style={styles.stepCount}>{currentSteps.toLocaleString()}</Text>
-            <Text style={styles.stepGoalText}>/ {stepGoal.toLocaleString()}</Text>
-          </View>
-        </View>
-
-        <View style={styles.stepStats}>
-          <View style={styles.stepStatItem}>
-            <Text style={styles.stepStatValue}>{Math.round(progress)}%</Text>
-            <Text style={styles.stepStatLabel}>Complete</Text>
-          </View>
-          <View style={styles.stepStatItem}>
-            <Text style={styles.stepStatValue}>
-              {Math.max(0, stepGoal - currentSteps).toLocaleString()}
-            </Text>
-            <Text style={styles.stepStatLabel}>Remaining</Text>
-          </View>
-        </View>
-      </View>
-
-      <Text style={styles.stepCardHint}>Tap to edit goal</Text>
-    </TouchableOpacity>
-  );
-}
 
 // Rest Day Card
 interface RestDayCardProps {
@@ -291,14 +190,7 @@ function RestDayCard({ streak }: RestDayCardProps) {
       <Text style={styles.restDayMessage}>
         Rest days are essential for muscle recovery and growth. Take it easy today – you've earned it!
       </Text>
-      {streak > 0 && (
-        <View style={styles.restDayStreak}>
-          <Flame size={20} color={COLORS.accent} />
-          <Text style={styles.restDayStreakText}>
-            {streak} day streak! Keep it going tomorrow.
-          </Text>
-        </View>
-      )}
+
       <View style={styles.restDayTips}>
         <Text style={styles.restDayTipsTitle}>Rest Day Tips:</Text>
         <Text style={styles.restDayTip}>• Light stretching or yoga</Text>
