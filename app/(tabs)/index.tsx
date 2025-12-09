@@ -340,8 +340,9 @@ function CelebrationModal({ visible, type, onClose, stepsCompleted = 0, stepGoal
     ? `Amazing! You crushed today's workout!`
     : `You've hit ${stepsCompleted.toLocaleString()} steps!`;
   const description = isWorkout
-    ? streak > 1 ? `You're on a ${streak} day streak! Keep the momentum going!` : 'Great start! Come back tomorrow to build your streak.'
+    ? 'Workout completed! Keep pushing toward your goals!'
     : `You reached your daily goal of ${stepGoal.toLocaleString()} steps. Keep moving!`;
+
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
