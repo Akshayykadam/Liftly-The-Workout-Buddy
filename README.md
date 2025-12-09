@@ -11,7 +11,8 @@ Liftly is a premium, comprehensive React Native mobile application designed to h
 - **Rest Day Management**: Dedicated rest day interface with recovery tips.
 
 ### 🧘 Mind & Body
-- **Yoga Routines**: Guided sessions for mobility, flexibility, and relaxation (e.g., Neck Release, Hip Flow, Desk Detox).
+- **Yoga Routines**: Guided sessions for mobility, flexibility, and relaxation.
+- **Smart Tracking**: Track duration/reps for each pose and mark routines as "Completed Today" with visual indicators.
 - **Meditation**: Timed breathing exercises and meditation sessions for focus and sleep.
 
 ### 📊 Visual Progress Analytics
@@ -31,8 +32,9 @@ Liftly is a premium, comprehensive React Native mobile application designed to h
   - Body Measurements (Weight, Height)
 
 ### 👤 Personalization & UI
+- **Extended Onboarding**: Comprehensive setup flow collecting fitness level, goals, measurements, and birth year for accurate age calculation.
 - **Premium Design**: Sleek dark mode interface with consistent color theory (Accent Green/Red).
-- **Profile Management**: Customizable profile with automatic BMI calculation.
+- **Profile Management**: customizable profile with automatic BMI and Age display.
 - **Smart Reminders**: Flexible notification system for workout reminders.
 - **Interactive Modals**: Polished animations for goal setting and achievements.
 

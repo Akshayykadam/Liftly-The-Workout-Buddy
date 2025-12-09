@@ -17,6 +17,7 @@ export interface WeightEntry {
 
 export interface UserProfile {
     name: string;
+    birthYear?: number;
     weight: number;
     height: number;
     weightUnit: 'kg' | 'lbs';
@@ -55,7 +56,7 @@ const DEFAULT_PROFILE: UserProfile = {
 const DEFAULT_USER_DATA: UserData = {
     profile: DEFAULT_PROFILE,
     weightHistory: []
-};
+}
 
 function getTodayKey(): string {
     const today = new Date();

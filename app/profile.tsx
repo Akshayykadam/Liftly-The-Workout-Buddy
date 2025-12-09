@@ -60,6 +60,7 @@ export default function ProfileScreen() {
 
     const bmi = calculateBMI();
     const levelInfo = getLevelInfo(profile.level);
+    const age = profile.birthYear ? new Date().getFullYear() - profile.birthYear : null;
 
     const getDayName = (day: number) => {
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -135,6 +136,14 @@ export default function ProfileScreen() {
                         </Text>
                         <Text style={styles.statLabel}>Height</Text>
                     </View>
+
+                    {age && (
+                        <View style={styles.statCard}>
+                            <Calendar size={24} color={COLORS.accent} strokeWidth={2} />
+                            <Text style={styles.statValue}>{age}</Text>
+                            <Text style={styles.statLabel}>Years</Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* BMI Card */}

@@ -35,7 +35,7 @@ const COLORS = {
     blue: '#3742FA'
 } as const;
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export default function OnboardingScreen() {
     const insets = useSafeAreaInsets();
@@ -52,6 +52,7 @@ export default function OnboardingScreen() {
     const [level, setLevel] = useState<WorkoutLevel | null>(null);
     const [gender, setGender] = useState<'male' | 'female'>('male');
     const [startDay, setStartDay] = useState<number>(1); // 1=Monday default
+    const [birthYear, setBirthYear] = useState('');
 
     const slideAnim = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -112,6 +113,7 @@ export default function OnboardingScreen() {
 
         completeOnboarding({
             name,
+            birthYear: parseInt(birthYear) || undefined,
             weight: parseFloat(weight) || 0,
             height: parseFloat(height) || 0,
             weightUnit,
@@ -131,11 +133,12 @@ export default function OnboardingScreen() {
             case 0: return true; // Welcome
             case 1: return true; // Gender always has a default
             case 2: return name.trim().length >= 2;
-            case 3: return parseFloat(weight) > 0;
-            case 4: return parseFloat(height) > 0;
-            case 5: return goal !== null;
-            case 6: return true; // Start day always has a default
-            case 7: return level !== null;
+            case 3: return birthYear.length === 4 && parseInt(birthYear) > 1900 && parseInt(birthYear) <= new Date().getFullYear();
+            case 4: return parseFloat(weight) > 0;
+            case 5: return parseFloat(height) > 0;
+            case 6: return goal !== null;
+            case 7: return true; // Start day always has a default
+            case 8: return level !== null;
             default: return false;
         }
     };
@@ -160,6 +163,13 @@ export default function OnboardingScreen() {
                 );
             case 3:
                 return (
+                    <BirthYearStep
+                        birthYear={birthYear}
+                        setBirthYear={setBirthYear}
+                    />
+                );
+            case 4:
+                return (
                     <WeightStep
                         weight={weight}
                         setWeight={setWeight}
@@ -167,7 +177,7 @@ export default function OnboardingScreen() {
                         setUnit={setWeightUnit}
                     />
                 );
-            case 4:
+            case 5:
                 return (
                     <HeightStep
                         height={height}
@@ -176,21 +186,21 @@ export default function OnboardingScreen() {
                         setUnit={setHeightUnit}
                     />
                 );
-            case 5:
+            case 6:
                 return (
                     <GoalStep
                         goal={goal}
                         setGoal={setGoal}
                     />
                 );
-            case 6:
+            case 7:
                 return (
                     <StartDayStep
                         startDay={startDay}
                         setStartDay={setStartDay}
                     />
                 );
-            case 7:
+            case 8:
                 return (
                     <LevelStep
                         level={level}
@@ -303,24 +313,26 @@ interface NameStepProps {
 
 function NameStep({ name, setName }: NameStepProps) {
     return (
-        <View style={styles.stepContent}>
-            <View style={styles.iconContainer}>
-                <User size={48} color={COLORS.accent} strokeWidth={1.5} />
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <View style={styles.iconContainer}>
+                    <User size={48} color={COLORS.accent} strokeWidth={1.5} />
+                </View>
+                <Text style={styles.stepTitle}>What's your name?</Text>
+                <Text style={styles.stepDescription}>
+                    Let's make this personal. How should we call you?
+                </Text>
+                <TextInput
+                    style={styles.textInput}
+                    placeholder="Enter your name"
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={name}
+                    onChangeText={setName}
+                    autoFocus
+                    autoCapitalize="words"
+                />
             </View>
-            <Text style={styles.stepTitle}>What's your name?</Text>
-            <Text style={styles.stepDescription}>
-                Let's make this personal. How should we call you?
-            </Text>
-            <TextInput
-                style={styles.textInput}
-                placeholder="Enter your name"
-                placeholderTextColor={COLORS.textSecondary}
-                value={name}
-                onChangeText={setName}
-                autoFocus
-                autoCapitalize="words"
-            />
-        </View>
+        </ScrollView>
     );
 }
 
@@ -333,40 +345,42 @@ interface WeightStepProps {
 
 function WeightStep({ weight, setWeight, unit, setUnit }: WeightStepProps) {
     return (
-        <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>What's your current weight?</Text>
-            <Text style={styles.stepDescription}>
-                This helps us track your progress over time.
-            </Text>
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>What's your current weight?</Text>
+                <Text style={styles.stepDescription}>
+                    This helps us track your progress over time.
+                </Text>
 
-            <View style={styles.unitToggle}>
-                <TouchableOpacity
-                    style={[styles.unitButton, unit === 'kg' && styles.unitButtonActive]}
-                    onPress={() => setUnit('kg')}
-                >
-                    <Text style={[styles.unitButtonText, unit === 'kg' && styles.unitButtonTextActive]}>kg</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.unitButton, unit === 'lbs' && styles.unitButtonActive]}
-                    onPress={() => setUnit('lbs')}
-                >
-                    <Text style={[styles.unitButtonText, unit === 'lbs' && styles.unitButtonTextActive]}>lbs</Text>
-                </TouchableOpacity>
-            </View>
+                <View style={styles.unitToggle}>
+                    <TouchableOpacity
+                        style={[styles.unitButton, unit === 'kg' && styles.unitButtonActive]}
+                        onPress={() => setUnit('kg')}
+                    >
+                        <Text style={[styles.unitButtonText, unit === 'kg' && styles.unitButtonTextActive]}>kg</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.unitButton, unit === 'lbs' && styles.unitButtonActive]}
+                        onPress={() => setUnit('lbs')}
+                    >
+                        <Text style={[styles.unitButtonText, unit === 'lbs' && styles.unitButtonTextActive]}>lbs</Text>
+                    </TouchableOpacity>
+                </View>
 
-            <View style={styles.inputRow}>
-                <TextInput
-                    style={[styles.textInput, styles.numberInput]}
-                    placeholder="0"
-                    placeholderTextColor={COLORS.textSecondary}
-                    value={weight}
-                    onChangeText={setWeight}
-                    keyboardType="decimal-pad"
-                    autoFocus
-                />
-                <Text style={styles.unitLabel}>{unit}</Text>
+                <View style={styles.inputRow}>
+                    <TextInput
+                        style={[styles.textInput, styles.numberInput]}
+                        placeholder="0"
+                        placeholderTextColor={COLORS.textSecondary}
+                        value={weight}
+                        onChangeText={setWeight}
+                        keyboardType="decimal-pad"
+                        autoFocus
+                    />
+                    <Text style={styles.unitLabel}>{unit}</Text>
+                </View>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
@@ -379,40 +393,42 @@ interface HeightStepProps {
 
 function HeightStep({ height, setHeight, unit, setUnit }: HeightStepProps) {
     return (
-        <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>What's your height?</Text>
-            <Text style={styles.stepDescription}>
-                We'll use this to calculate your BMI and other metrics.
-            </Text>
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>What's your height?</Text>
+                <Text style={styles.stepDescription}>
+                    We'll use this to calculate your BMI and other metrics.
+                </Text>
 
-            <View style={styles.unitToggle}>
-                <TouchableOpacity
-                    style={[styles.unitButton, unit === 'cm' && styles.unitButtonActive]}
-                    onPress={() => setUnit('cm')}
-                >
-                    <Text style={[styles.unitButtonText, unit === 'cm' && styles.unitButtonTextActive]}>cm</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.unitButton, unit === 'ft' && styles.unitButtonActive]}
-                    onPress={() => setUnit('ft')}
-                >
-                    <Text style={[styles.unitButtonText, unit === 'ft' && styles.unitButtonTextActive]}>ft</Text>
-                </TouchableOpacity>
-            </View>
+                <View style={styles.unitToggle}>
+                    <TouchableOpacity
+                        style={[styles.unitButton, unit === 'cm' && styles.unitButtonActive]}
+                        onPress={() => setUnit('cm')}
+                    >
+                        <Text style={[styles.unitButtonText, unit === 'cm' && styles.unitButtonTextActive]}>cm</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.unitButton, unit === 'ft' && styles.unitButtonActive]}
+                        onPress={() => setUnit('ft')}
+                    >
+                        <Text style={[styles.unitButtonText, unit === 'ft' && styles.unitButtonTextActive]}>ft</Text>
+                    </TouchableOpacity>
+                </View>
 
-            <View style={styles.inputRow}>
-                <TextInput
-                    style={[styles.textInput, styles.numberInput]}
-                    placeholder="0"
-                    placeholderTextColor={COLORS.textSecondary}
-                    value={height}
-                    onChangeText={setHeight}
-                    keyboardType="decimal-pad"
-                    autoFocus
-                />
-                <Text style={styles.unitLabel}>{unit}</Text>
+                <View style={styles.inputRow}>
+                    <TextInput
+                        style={[styles.textInput, styles.numberInput]}
+                        placeholder="0"
+                        placeholderTextColor={COLORS.textSecondary}
+                        value={height}
+                        onChangeText={setHeight}
+                        keyboardType="decimal-pad"
+                        autoFocus
+                    />
+                    <Text style={styles.unitLabel}>{unit}</Text>
+                </View>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
@@ -447,40 +463,42 @@ function GoalStep({ goal, setGoal }: GoalStepProps) {
     ];
 
     return (
-        <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>What's your goal?</Text>
-            <Text style={styles.stepDescription}>
-                Choose your primary fitness objective.
-            </Text>
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>What's your goal?</Text>
+                <Text style={styles.stepDescription}>
+                    Choose your primary fitness objective.
+                </Text>
 
-            <View style={styles.cardList}>
-                {goals.map((g) => (
-                    <TouchableOpacity
-                        key={g.key}
-                        style={[
-                            styles.goalCard,
-                            goal === g.key && { borderColor: g.color }
-                        ]}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setGoal(g.key);
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.goalCardContent}>
-                            {g.icon}
-                            <View style={styles.goalCardText}>
-                                <Text style={styles.goalCardLabel}>{g.label}</Text>
-                                <Text style={styles.goalCardDescription}>{g.description}</Text>
+                <View style={styles.cardList}>
+                    {goals.map((g) => (
+                        <TouchableOpacity
+                            key={g.key}
+                            style={[
+                                styles.goalCard,
+                                goal === g.key && { borderColor: g.color }
+                            ]}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setGoal(g.key);
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.goalCardContent}>
+                                {g.icon}
+                                <View style={styles.goalCardText}>
+                                    <Text style={styles.goalCardLabel}>{g.label}</Text>
+                                    <Text style={styles.goalCardDescription}>{g.description}</Text>
+                                </View>
                             </View>
-                        </View>
-                        {goal === g.key && (
-                            <View style={[styles.selectedIndicator, { backgroundColor: g.color }]} />
-                        )}
-                    </TouchableOpacity>
-                ))}
+                            {goal === g.key && (
+                                <View style={[styles.selectedIndicator, { backgroundColor: g.color }]} />
+                            )}
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
@@ -568,45 +586,47 @@ function GenderStep({ gender, setGender }: GenderStepProps) {
     ];
 
     return (
-        <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Your Gender</Text>
-            <Text style={styles.stepSubtitle}>
-                We&apos;ll customize your workout program based on your selection
-            </Text>
-
-            <View style={styles.genderOptions}>
-                {genderOptions.map((option) => (
-                    <TouchableOpacity
-                        key={option.value}
-                        style={[
-                            styles.genderButton,
-                            gender === option.value && styles.genderButtonActive
-                        ]}
-                        onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            setGender(option.value);
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.genderIconContainer}>
-                            {option.icon}
-                        </View>
-                        <Text style={[
-                            styles.genderButtonText,
-                            gender === option.value && styles.genderButtonTextActive
-                        ]}>
-                            {option.label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            <View style={styles.genderNote}>
-                <Text style={styles.genderNoteText}>
-                    Note: This selection cannot be changed later
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <Text style={styles.stepTitle}>Your Gender</Text>
+                <Text style={styles.stepSubtitle}>
+                    We&apos;ll customize your workout program based on your selection
                 </Text>
+
+                <View style={styles.genderOptions}>
+                    {genderOptions.map((option) => (
+                        <TouchableOpacity
+                            key={option.value}
+                            style={[
+                                styles.genderButton,
+                                gender === option.value && styles.genderButtonActive
+                            ]}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setGender(option.value);
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.genderIconContainer}>
+                                {option.icon}
+                            </View>
+                            <Text style={[
+                                styles.genderButtonText,
+                                gender === option.value && styles.genderButtonTextActive
+                            ]}>
+                                {option.label}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+
+                <View style={styles.genderNote}>
+                    <Text style={styles.genderNoteText}>
+                        Note: This selection cannot be changed later
+                    </Text>
+                </View>
             </View>
-        </View>
+        </ScrollView >
     );
 }
 
@@ -663,6 +683,42 @@ function LevelStep({ level, setLevel }: LevelStepProps) {
                         );
                     })}
                 </View>
+            </View>
+        </ScrollView>
+    );
+}
+
+interface BirthYearStepProps {
+    birthYear: string;
+    setBirthYear: (year: string) => void;
+}
+
+function BirthYearStep({ birthYear, setBirthYear }: BirthYearStepProps) {
+    return (
+        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={styles.stepContent}>
+                <View style={styles.iconContainer}>
+                    <CalendarIcon size={48} color={COLORS.accent} strokeWidth={1.5} />
+                </View>
+                <Text style={styles.stepTitle}>When were you born?</Text>
+                <Text style={styles.stepDescription}>
+                    This helps us calculate your age for accurate fitness recommendations.
+                </Text>
+                <TextInput
+                    style={[styles.textInput, styles.numberInput]}
+                    placeholder="YYYY"
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={birthYear}
+                    onChangeText={(text) => {
+                        // Only allow numbers and max 4 digits
+                        if (/^\d{0,4}$/.test(text)) {
+                            setBirthYear(text);
+                        }
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={4}
+                    autoFocus
+                />
             </View>
         </ScrollView>
     );
