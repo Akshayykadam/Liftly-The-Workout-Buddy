@@ -13,6 +13,7 @@ export interface YogaPose {
     instructions: string[];
     avoid: string;
     benefits: string;
+    image?: any;
 }
 
 export interface YogaRoutine {
@@ -65,13 +66,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Cat-Cow',
                 instructions: ['Start on hands and knees', 'Inhale, arch your back (Cow)', 'Exhale, round your spine (Cat)'],
                 avoid: 'Overarching the lower back if it hurts',
-                benefits: 'Warms up the spine'
+                benefits: 'Warms up the spine',
+                image: require('@/assets/images/yoga/cat_cow.png')
             },
             {
                 name: 'Child\'s Pose',
                 instructions: ['Kneel and sit back on your heels', 'Reach arms forward', 'Rest forehead on the floor'],
                 avoid: 'Forcing hips down if knees hurt',
-                benefits: 'Gently stretches hips and back'
+                benefits: 'Gently stretches hips and back',
+                image: require('@/assets/images/yoga/childs_pose.png')
             }
         ]
     },
@@ -87,13 +90,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Standing Forward Fold',
                 instructions: ['Stand feet hip-width apart', 'Hinge at hips', 'Let head hang heavy'],
                 avoid: 'Locking knees',
-                benefits: 'Relieves tension in neck and back'
+                benefits: 'Relieves tension in neck and back',
+                image: require('@/assets/images/yoga/standing_forward_fold.png')
             },
             {
                 name: 'Chest Opener',
                 instructions: ['Clasp hands behind back', 'Straighten arms', 'Lift chest'],
                 avoid: 'Jutting ribs forward',
-                benefits: 'Opens tight shoulders'
+                benefits: 'Opens tight shoulders',
+                image: require('@/assets/images/yoga/chest_opener.png')
             }
         ]
     },
@@ -109,13 +114,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Neck Rolls',
                 instructions: ['Sit up straight', 'Gently drop chin to chest', 'Roll ear to shoulder, then back, then other side'],
                 avoid: 'Crunching the neck backwards too hard',
-                benefits: 'Relieves cervical tension'
+                benefits: 'Relieves cervical tension',
+                image: require('@/assets/images/yoga/neck_rolls.png')
             },
             {
                 name: 'Ear to Shoulder',
                 instructions: ['Drop right ear to right shoulder', 'Extend left arm out to side', 'Hold for deep stretch'],
                 avoid: 'Lifting shoulder to ear',
-                benefits: 'Stretches side of neck'
+                benefits: 'Stretches side of neck',
+                image: require('@/assets/images/yoga/ear_to_shoulder.png')
             }
         ]
     },
@@ -131,13 +138,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Thread the Needle',
                 instructions: ['Start on all fours', 'Reach right arm under left', 'Rest shoulder on floor'],
                 avoid: 'Putting too much weight on the head',
-                benefits: 'Twists and releases upper back'
+                benefits: 'Twists and releases upper back',
+                image: require('@/assets/images/yoga/thread_the_needle.png')
             },
             {
                 name: 'Eagle Arms',
                 instructions: ['Cross right arm under left', 'Wrap forearms', 'Lift elbows to shoulder height'],
                 avoid: 'Hunching shoulders',
-                benefits: 'Opens space between shoulder blades'
+                benefits: 'Opens space between shoulder blades',
+                image: require('@/assets/images/yoga/eagle_arms.png')
             }
         ]
     },
@@ -153,13 +162,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Pigeon Pose',
                 instructions: ['Bring right knee forward behind right wrist', 'Extend left leg back', 'Fold forward if comfortable'],
                 avoid: 'Knee pain - stay upright or use figure 4 instead',
-                benefits: 'Deep hip opener'
+                benefits: 'Deep hip opener',
+                image: require('@/assets/images/yoga/pigeon_pose.png')
             },
             {
                 name: 'Butterfly Pose',
                 instructions: ['Sit with soles of feet together', 'Let knees fall open', 'Hold ankles and lengthen spine'],
                 avoid: 'Forcing knees down',
-                benefits: 'Stretches inner thighs and hips'
+                benefits: 'Stretches inner thighs and hips',
+                image: require('@/assets/images/yoga/butterfly_pose.png')
             }
         ]
     },
@@ -175,13 +186,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Puppy Pose',
                 instructions: ['Start on all fours', 'Walk hands forward', 'Melt chest toward floor while keeping hips high'],
                 avoid: ' collapsing lower back',
-                benefits: 'Deep shoulder and chest stretch'
+                benefits: 'Deep shoulder and chest stretch',
+                image: require('@/assets/images/yoga/puppy_pose.png')
             },
             {
                 name: 'Cow Face Arms',
                 instructions: ['Reach right arm up and back', 'Reach left arm behind and up', 'Try to clasp fingers'],
                 avoid: 'Jutting head forward',
-                benefits: 'Mobility for shoulders and triceps'
+                benefits: 'Mobility for shoulders and triceps',
+                image: require('@/assets/images/yoga/cow_face_arms.png')
             }
         ]
     },
@@ -197,13 +210,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Reclined Butterfly',
                 instructions: ['Lie on back', 'Soles of feet together, knees open', 'Rest hands on belly'],
                 avoid: 'Strain in hips - use pillows under knees',
-                benefits: 'Passive hip opening and relaxation'
+                benefits: 'Passive hip opening and relaxation',
+                image: require('@/assets/images/yoga/reclined_butterfly.png')
             },
             {
                 name: 'Savasana',
                 instructions: ['Lie flat on back', 'Arms by sides, palms up', 'Close eyes and relax completely'],
                 avoid: 'Fall asleep if you don\'t mean to!',
-                benefits: 'Total nervous system reset'
+                benefits: 'Total nervous system reset',
+                image: require('@/assets/images/yoga/savasana.png')
             }
         ]
     },
@@ -219,13 +234,15 @@ export const YOGA_ROUTINES: YogaRoutine[] = [
                 name: 'Seated Spinal Twist',
                 instructions: ['Sit sideways in chair', 'Hold back of chair', 'Twist gently toward chair back'],
                 avoid: 'Forcing the twist',
-                benefits: 'Mobilizes spine'
+                benefits: 'Mobilizes spine',
+                image: require('@/assets/images/yoga/seated_spinal_twist.png')
             },
             {
                 name: 'Wrist Relief',
                 instructions: ['Extend arm forward, palm up', 'Gently pull fingers back with other hand', 'Switch to palm down'],
                 avoid: 'Hyperextending',
-                benefits: 'Relieves typing strain'
+                benefits: 'Relieves typing strain',
+                image: require('@/assets/images/yoga/wrist_relief.png')
             }
         ]
     }

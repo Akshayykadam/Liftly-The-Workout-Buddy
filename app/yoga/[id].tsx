@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Animated, Pressable, Image, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Clock, AlertCircle, Sparkles } from 'lucide-react-native';
@@ -59,6 +59,16 @@ export default function YogaScreen() {
                                 </View>
                                 <Text style={styles.poseName}>{pose.name}</Text>
                             </View>
+
+                            {pose.image && (
+                                <View style={styles.imageContainer}>
+                                    <Image
+                                        source={pose.image}
+                                        style={styles.exerciseImage}
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            )}
 
                             <View style={styles.instructionList}>
                                 {pose.instructions.map((inst, i) => (
@@ -272,6 +282,20 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
         color: COLORS.black
+    },
+    imageContainer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        backgroundColor: '#000000',
+        borderRadius: 12,
+        marginBottom: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden'
+    },
+    exerciseImage: {
+        width: '80%',
+        height: '80%',
     }
 
 });
