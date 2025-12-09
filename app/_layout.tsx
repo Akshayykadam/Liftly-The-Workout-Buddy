@@ -7,7 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { WorkoutProvider } from "@/contexts/WorkoutContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
-import { StepProvider } from "@/contexts/StepContext";
+import { HealthConnectProvider } from "@/contexts/HealthConnectContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -54,11 +54,11 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#000000' }}>
         <UserProvider>
-          <StepProvider>
+          <HealthConnectProvider>
             <WorkoutProvider>
               <NavigationController />
             </WorkoutProvider>
-          </StepProvider>
+          </HealthConnectProvider>
         </UserProvider>
       </GestureHandlerRootView>
     </QueryClientProvider>

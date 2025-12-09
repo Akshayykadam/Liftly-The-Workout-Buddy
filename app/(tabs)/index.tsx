@@ -1,5 +1,5 @@
 import { useWorkout } from '@/contexts/WorkoutContext';
-import { useSteps } from '@/contexts/StepContext';
+import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import * as Haptics from 'expo-haptics';
 import { Check, Flame, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, Moon, User, Heart } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
@@ -34,7 +34,12 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { currentDayNumber, currentWorkout, isExerciseCompleted, toggleCompletion, getTodayStats, streak, isRestDay } = useWorkout();
-  const { currentSteps, stepGoal, progress, isAvailable, isLoading, setStepGoal } = useSteps();
+  const { dashboardData, stepGoal, stepProgress, isInitialized, isLoading, setStepGoal } = useHealthConnect();
+
+  // Get step data from HealthConnectContext
+  const currentSteps = dashboardData.steps?.today || 0;
+  const isAvailable = isInitialized;
+
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState<'workout' | 'steps' | null>(null);
@@ -124,7 +129,7 @@ export default function HomeScreen() {
         <StepCounterCard
           currentSteps={currentSteps}
           stepGoal={stepGoal}
-          progress={progress}
+          progress={stepProgress}
           isAvailable={isAvailable}
           isLoading={isLoading}
           onEditGoal={() => setShowGoalModal(true)}

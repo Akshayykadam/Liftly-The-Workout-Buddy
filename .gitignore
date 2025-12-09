@@ -1,0 +1,50 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# React Native - Android
+android/app/build/
+android/build/
+android/.gradle/
+android/.idea/
+*.iml
+
+# React Native - iOS
+ios/Pods/
+ios/build/
+*.xcworkspace
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Metro bundler cache
+.expo/
+.expo-shared/
+package-lock.json
+expo-env.d.ts
+
+# React Native bundler cache
+*.packager
+*.hmap
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+.env.production
+.env.development
+
+# JetBrains IDE
+.idea/
+
+# VSCode
+.vscode/

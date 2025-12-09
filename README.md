@@ -42,7 +42,7 @@ Liftly is a comprehensive React Native mobile application designed to help you t
 - **State Management**: React Context & Hooks
 - **UI Components**: Custom components with `react-native-svg` for charts and `lucide-react-native` for iconography.
 - **Persistence**: AsyncStorage for local data saving.
-- **Sensors**: `expo-sensors` for step counting.
+- **Health**: `react-native-health-connect` for Android Health Connect integration.
 - **Haptics**: `expo-haptics` for tactile feedback.
 
 ## Getting Started
@@ -69,11 +69,16 @@ Liftly is a comprehensive React Native mobile application designed to help you t
    npm start
    ```
 
-### Running on Device
+### Running on Device (Development Build)
 
-1. Download **Expo Go** from the App Store (iOS) or Google Play (Android).
-2. Scan the QR code presented in the terminal.
-3. The app will bundle and load on your device.
+Since this app uses native Health Connect APIs, it **cannot** run in standard Expo Go. You must create a development build:
+
+1. Connect your Android device via USB.
+2. Run the android build command:
+   ```bash
+   npm run android
+   ```
+3. This will trigger a prebuild and install the development APK on your device.
 
 ## Building for Production
 
@@ -95,7 +100,7 @@ eas build --platform ios --profile production
 - `app/`: Expo Router pages and layouts
 - `components/`: Reusable UI components (Cards, Modals, Charts)
 - `constants/`: Configuration, workout data, and color themes
-- `contexts/`: Global state management (User, Workout, Steps)
+- `contexts/`: Global state management (User, Workout, HealthConnect)
 - `utils/`: Helper functions and notifications logic
 
 ---

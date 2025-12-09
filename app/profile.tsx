@@ -1,5 +1,5 @@
 import { useUser } from '@/contexts/UserContext';
-import { useSteps } from '@/contexts/StepContext';
+import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import { useRouter } from 'expo-router';
 import { getLevelInfo, type WorkoutLevel } from '@/constants';
 import { Calendar, Bell } from 'lucide-react-native';
@@ -51,7 +51,7 @@ export default function ProfileScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
     const { profile, calculateBMI, updateProfile, setLevel, setStartDayOfWeek } = useUser();
-    const { stepGoal, setStepGoal } = useSteps();
+    const { stepGoal, setStepGoal } = useHealthConnect();
     const [showEditModal, setShowEditModal] = useState(false);
     const [showLevelModal, setShowLevelModal] = useState(false);
     const [showStepGoalModal, setShowStepGoalModal] = useState(false);
