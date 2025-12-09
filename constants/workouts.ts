@@ -58,6 +58,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Back",
+        image: require('@/assets/images/exercises/lat_pulldown_supine.png'),
         howToPerform: [
           "Sit at lat pulldown machine with thighs secured under pad",
           "Grip bar with palms facing you (underhand), hands shoulder-width apart",
@@ -89,6 +90,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Trapezius",
+        image: require('@/assets/images/exercises/shrugs.png'),
         howToPerform: [
           "Stand with feet hip-width apart holding dumbbells at sides",
           "Keep arms straight and shoulders relaxed",
@@ -120,6 +122,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Chest",
+        image: require('@/assets/images/exercises/dumbbell_bench_press.png'),
         howToPerform: [
           "Lie on flat bench with dumbbells held at chest level",
           "Plant feet firmly on floor, shoulder blades squeezed",
@@ -215,6 +218,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Shoulder",
+        image: require('@/assets/images/exercises/lateral_raise.png'),
         howToPerform: [
           "Stand with dumbbells at sides, palms facing in",
           "Keep slight bend in elbows throughout",
@@ -246,6 +250,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Back",
+        image: require('@/assets/images/exercises/back_extension.png'),
         howToPerform: [
           "Position yourself on back extension machine, ankles secured",
           "Cross arms over chest or behind head",
@@ -277,6 +282,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "15 to 20",
         targetMuscle: "Bicep",
+        image: require('@/assets/images/exercises/dumbbell_curl.png'),
         howToPerform: [
           "Stand with dumbbells at sides, palms facing forward",
           "Keep elbows close to torso throughout",
@@ -544,6 +550,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 1,
         reps: "1 min walk / 1 min run",
         targetMuscle: "Cardiovascular",
+
         howToPerform: [
           "Start with 2-minute warm-up walk at comfortable pace",
           "Alternate between 1 minute walking and 1 minute running",
@@ -576,6 +583,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 1,
         reps: "15 mins",
         targetMuscle: "Cardiovascular",
+        image: require('@/assets/images/exercises/elliptical.png'),
         howToPerform: [
           "Step onto elliptical and grip handles",
           "Begin with slow warm-up for 2 minutes",
@@ -671,6 +679,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "1 min",
         targetMuscle: "Core, Cardiovascular",
+        image: require('@/assets/images/exercises/mountain_climbers.png'),
         howToPerform: [
           "Start in high plank position, hands under shoulders",
           "Drive right knee toward chest",
@@ -702,6 +711,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "20",
         targetMuscle: "Abdominal",
+        image: require('@/assets/images/exercises/machine_crunch.png'),
         howToPerform: [
           "Sit on ab crunch machine with back against pad",
           "Grip handles and place arms/elbows on pads",
@@ -733,6 +743,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "20",
         targetMuscle: "Abdominal",
+        image: require('@/assets/images/exercises/leg_raise_parallel.png'),
         howToPerform: [
           "Grip parallel bars and lift body, supporting on forearms",
           "Keep back against pad if available",
@@ -764,6 +775,7 @@ export const WORKOUTS: WorkoutDay[] = [
         sets: 3,
         reps: "20",
         targetMuscle: "Internal / External Obliques",
+        image: require('@/assets/images/exercises/twisting_crunches.png'),
         howToPerform: [
           "Lie on back with knees bent, hands behind head",
           "Lift shoulder blades off ground",
