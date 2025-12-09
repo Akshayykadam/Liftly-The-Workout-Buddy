@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Clock, AlertCircle, Sparkles } from 'lucide-react-native';
 import { YOGA_ROUTINES } from '@/constants/mindfulness';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const COLORS = {
     black: '#000000',
@@ -20,14 +21,29 @@ export default function YogaScreen() {
     const router = useRouter();
     const routine = YOGA_ROUTINES.find(r => r.id === id);
 
+    const handleFinish = async () => {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const key = `yoga_progress_${today}`;
+            const existing = await AsyncStorage.getItem(key);
+            const completed = existing ? JSON.parse(existing) : [];
+
+            if (id && !completed.includes(id)) {
+                const updated = [...completed, id];
+                await AsyncStorage.setItem(key, JSON.stringify(updated));
+            }
+        } catch (e) {
+            console.error('Failed to save progress', e);
+        }
+        router.back();
+    };
+
     if (!routine) return null;
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-
                 <Text style={styles.headerTitle}>Yoga Flow</Text>
-
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
@@ -56,6 +72,10 @@ export default function YogaScreen() {
                                     <Text style={styles.poseNumberText}>{index + 1}</Text>
                                 </View>
                                 <Text style={styles.poseName}>{pose.name}</Text>
+                                <View style={styles.poseDuration}>
+                                    <Clock size={14} color={COLORS.accent} />
+                                    <Text style={styles.poseTime}>{pose.duration}</Text>
+                                </View>
                             </View>
 
                             {pose.image && (
@@ -98,12 +118,12 @@ export default function YogaScreen() {
 
                 <TouchableOpacity
                     style={styles.completeButton}
-                    onPress={() => router.back()}
+                    onPress={handleFinish}
                 >
                     <Text style={styles.completeButtonText}>Finish Routine</Text>
                 </TouchableOpacity>
-            </ScrollView>
-        </SafeAreaView>
+            </ScrollView >
+        </SafeAreaView >
     );
 }
 
@@ -215,7 +235,24 @@ const styles = StyleSheet.create({
     poseName: {
         fontSize: 18,
         fontWeight: '700',
-        color: COLORS.textPrimary
+        color: COLORS.textPrimary,
+        flex: 1
+    },
+    poseDuration: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: COLORS.surface,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: COLORS.border
+    },
+    poseTime: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: COLORS.accent
     },
     instructionList: {
         marginBottom: 20,

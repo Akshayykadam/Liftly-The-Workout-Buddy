@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { MindfulnessCard } from '@/components/MindfulnessCard';
 import { MEDITATIONS, YOGA_ROUTINES } from '@/constants/mindfulness';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const COLORS = {
     black: '#000000',
@@ -16,6 +17,24 @@ const COLORS = {
 export default function MindfulnessScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
+    const [completedIds, setCompletedIds] = useState<string[]>([]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const loadProgress = async () => {
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const key = `yoga_progress_${today}`;
+                    const existing = await AsyncStorage.getItem(key);
+                    const completed = existing ? JSON.parse(existing) : [];
+                    setCompletedIds(completed);
+                } catch (e) {
+                    console.error('Failed to load yoga progress', e);
+                }
+            };
+            loadProgress();
+        }, [])
+    );
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -53,7 +72,11 @@ export default function MindfulnessScreen() {
 
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Yoga for Beginners</Text>
-                    <Text style={styles.sectionSubtitle}>Simple movements for mobility</Text>
+                    <Text style={[styles.sectionSubtitle, { color: completedIds.length > 0 ? COLORS.accent : COLORS.accent }]}>
+                        {completedIds.length === 0
+                            ? "Start your movement for today"
+                            : `${completedIds.length} routine${completedIds.length === 1 ? '' : 's'} completed today`}
+                    </Text>
 
                     <View style={styles.list}>
                         {YOGA_ROUTINES.map((item) => (
@@ -64,6 +87,7 @@ export default function MindfulnessScreen() {
                                 duration={item.duration}
                                 color={item.color}
                                 type="Yoga"
+                                isCompleted={completedIds.includes(item.id)}
                                 onPress={() => router.push({
                                     pathname: "/yoga/[id]",
                                     params: { id: item.id }

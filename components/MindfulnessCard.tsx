@@ -9,9 +9,10 @@ interface MindfulnessCardProps {
     color: string;
     type: 'Meditation' | 'Yoga';
     onPress: () => void;
+    isCompleted?: boolean;
 }
 
-export function MindfulnessCard({ title, description, duration, color, type, onPress }: MindfulnessCardProps) {
+export function MindfulnessCard({ title, description, duration, color, type, onPress, isCompleted }: MindfulnessCardProps) {
     return (
         <TouchableOpacity
             style={styles.container}
@@ -20,8 +21,15 @@ export function MindfulnessCard({ title, description, duration, color, type, onP
         >
             <View style={[styles.colorStrip, { backgroundColor: color }]} />
             <View style={styles.content}>
-                <View style={[styles.badge, { backgroundColor: color + '20' }]}>
-                    <Text style={[styles.badgeText, { color: color }]}>{type}</Text>
+                <View style={styles.headerRow}>
+                    <View style={[styles.badge, { backgroundColor: color + '20' }]}>
+                        <Text style={[styles.badgeText, { color: color }]}>{type}</Text>
+                    </View>
+                    {isCompleted && (
+                        <View style={[styles.completedBadge, { backgroundColor: color + '20' }]}>
+                            <Text style={[styles.completedText, { color: color }]}>Completed today</Text>
+                        </View>
+                    )}
                 </View>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.description} numberOfLines={2}>{description}</Text>
@@ -65,6 +73,22 @@ const styles = StyleSheet.create({
     },
     badgeText: {
         fontSize: 12,
+        fontWeight: '600'
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8
+    },
+    completedBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        marginBottom: 8
+    },
+    completedText: {
+        fontSize: 11,
         fontWeight: '600'
     },
     title: {
