@@ -41,7 +41,6 @@ export default function HomeScreen() {
   const currentSteps = dashboardData.steps?.today || 0;
   const isAvailable = isInitialized;
 
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState<'workout' | 'steps' | null>(null);
   const [celebratedWorkout, setCelebratedWorkout] = useState(false);
@@ -141,17 +140,16 @@ export default function HomeScreen() {
               exercise={exercise}
               isCompleted={isExerciseCompleted(exercise.name)}
               onToggleComplete={() => handleToggleComplete(exercise.name)}
-              onPress={() => setSelectedExercise(exercise)}
+              onPress={() => router.push({
+                pathname: "/exercise-detail",
+                params: { exercise: JSON.stringify(exercise) }
+              })}
             />
           ))
         )}
       </ScrollView>
 
-      <ExerciseDetailModal
-        exercise={selectedExercise}
-        visible={selectedExercise !== null}
-        onClose={() => setSelectedExercise(null)}
-      />
+
 
       <GoalEditModal
         visible={showGoalModal}
@@ -443,97 +441,6 @@ function ExerciseCard({ exercise, isCompleted, onToggleComplete, onPress }: Exer
   );
 }
 
-// Exercise Detail Modal Component
-interface ExerciseDetailModalProps {
-  exercise: Exercise | null;
-  visible: boolean;
-  onClose: () => void;
-}
-
-function ExerciseDetailModal({ exercise, visible, onClose }: ExerciseDetailModalProps) {
-  const insets = useSafeAreaInsets();
-
-  if (!exercise) return null;
-
-  return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <Pressable style={styles.modalBackdrop} onPress={onClose} />
-        <View style={[styles.modalContent, { marginTop: 80 }]}>
-          <View style={styles.modalHandle} />
-          <ScrollView
-            style={styles.modalScrollView}
-            contentContainerStyle={styles.modalScrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={true}
-          >
-            {exercise.image && (
-              <View style={styles.imageContainer}>
-                <Image
-                  source={exercise.image}
-                  style={styles.exerciseImage}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
-
-            <Text style={styles.modalTitle}>{exercise.name}</Text>
-            <Text style={styles.modalMuscle}>{exercise.targetMuscle}</Text>
-
-            <View style={styles.modalSection}>
-              <Text style={styles.sectionTitle}>How to Perform</Text>
-              {exercise.howToPerform.map((step: string, index: number) => (
-                <View key={`instruction-${index}`} style={styles.stepContainer}>
-                  <Text style={styles.stepNumber}>{index + 1}.</Text>
-                  <Text style={styles.stepText}>{step}</Text>
-                </View>
-              ))}
-            </View>
-
-            <View style={styles.modalSection}>
-              <Text style={styles.sectionTitle}>Do&apos;s ✓</Text>
-              {exercise.dos.map((item: string, index: number) => (
-                <View key={`do-${index}`} style={styles.bulletContainer}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-
-            <View style={styles.modalSection}>
-              <Text style={styles.sectionTitle}>Don&apos;ts ✗</Text>
-              {exercise.donts.map((item: string, index: number) => (
-                <View key={`dont-${index}`} style={styles.bulletContainer}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-
-            <View style={styles.modalSection}>
-              <Text style={styles.sectionTitle}>Benefits</Text>
-              {exercise.benefits.map((item: string, index: number) => (
-                <View key={`benefit-${index}`} style={styles.bulletContainer}>
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-
-          <TouchableOpacity
-            style={[styles.closeButton, { marginBottom: insets.bottom + 20 }]}
-            onPress={onClose}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.closeButtonText}>Got it</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1
@@ -687,7 +594,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingTop: 12,
-    flex: 1
+    height: '92%',
+    marginTop: 'auto'
   },
   modalHandle: {
     width: 40,
@@ -713,7 +621,7 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 20
+    paddingBottom: 150
   },
   modalTitle: {
     fontSize: 28,
@@ -772,9 +680,9 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     backgroundColor: COLORS.accent,
-    marginHorizontal: 24,
-    marginTop: 12,
-    marginBottom: 12,
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 10,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center'
