@@ -13,7 +13,8 @@ import {
   Animated,
   Modal,
   Pressable,
-  TextInput
+  TextInput,
+  Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -462,10 +463,20 @@ function ExerciseDetailModal({ exercise, visible, onClose }: ExerciseDetailModal
           <View style={styles.modalHandle} />
           <ScrollView
             style={styles.modalScrollView}
-            contentContainerStyle={[styles.modalScrollContent, { paddingBottom: insets.bottom + 20 }]}
+            contentContainerStyle={styles.modalScrollContent}
             showsVerticalScrollIndicator={false}
             bounces={true}
           >
+            {exercise.image && (
+              <View style={styles.imageContainer}>
+                <Image
+                  source={exercise.image}
+                  style={styles.exerciseImage}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+
             <Text style={styles.modalTitle}>{exercise.name}</Text>
             <Text style={styles.modalMuscle}>{exercise.targetMuscle}</Text>
 
@@ -681,10 +692,24 @@ const styles = StyleSheet.create({
   modalHandle: {
     width: 40,
     height: 4,
-    backgroundColor: COLORS.border,
+    backgroundColor: '#333',
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20
+  },
+  imageContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: '#000000',
+    borderRadius: 12,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden'
+  },
+  exerciseImage: {
+    width: '80%',
+    height: '80%',
   },
   modalScrollContent: {
     paddingHorizontal: 24,

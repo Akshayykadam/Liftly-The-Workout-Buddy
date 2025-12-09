@@ -31,7 +31,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Great for learning pressing movement pattern",
                     "Safe and stable for beginners",
                     "Builds foundational chest strength"
-                ]
+                ],
+                image: require('@/assets/images/exercises/machine_chest_press.png')
             },
             {
                 name: "Assisted Pull-up Machine",
@@ -59,7 +60,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Builds pull-up strength progressively",
                     "Strengthens lats and biceps",
                     "Great stepping stone to unassisted pull-ups"
-                ]
+                ],
+                image: require('@/assets/images/exercises/assisted_pullup_machine.png')
             },
             {
                 name: "Dumbbell Shoulder Press (Seated)",
@@ -85,7 +87,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Builds shoulder strength and stability",
                     "Seated position provides back support",
                     "Develops overhead pressing foundation"
-                ]
+                ],
+                image: require('@/assets/images/exercises/shoulder_press.png')
             },
             {
                 name: "Cable Bicep Curl",
@@ -112,7 +115,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Constant tension throughout movement",
                     "Builds bicep strength and definition",
                     "Easy to control and adjust weight"
-                ]
+                ],
+                image: require('@/assets/images/exercises/cable_bicep_curl.png')
             },
             {
                 name: "Tricep Pushdown",
@@ -139,7 +143,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Isolates triceps effectively",
                     "Safe for beginners",
                     "Builds arm strength"
-                ]
+                ],
+                image: require('@/assets/images/exercises/tricep_pushdown.png')
             }
         ]
     },
@@ -172,7 +177,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Safe way to build leg strength",
                     "Reduces stress on lower back",
                     "Great for building quad and glute strength"
-                ]
+                ],
+                image: require('@/assets/images/exercises/leg_press.png')
             },
             {
                 name: "Leg Extension",
@@ -199,7 +205,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Isolates quadriceps effectively",
                     "Great for building quad definition",
                     "Easy to learn and perform"
-                ]
+                ],
+                image: require('@/assets/images/exercises/leg_extension.png')
             },
             {
                 name: "Lying Leg Curl",
@@ -226,7 +233,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Strengthens hamstrings",
                     "Prevents muscle imbalances",
                     "Reduces injury risk"
-                ]
+                ],
+                image: require('@/assets/images/exercises/lying_leg_curl.png')
             },
             {
                 name: "Calf Raise (Machine)",
@@ -253,7 +261,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Develops calf size and strength",
                     "Improves ankle stability",
                     "Easy to perform and progress"
-                ]
+                ],
+                image: require('@/assets/images/exercises/calf_raise_machine.png')
             },
             {
                 name: "Glute Kickback (Machine)",
@@ -280,7 +289,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Targets glutes directly",
                     "Great for building lower body shape",
                     "Beginner-friendly movement"
-                ]
+                ],
+                image: require('@/assets/images/exercises/glute_kickback_machine.png')
             }
         ]
     },
@@ -313,7 +323,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Excellent low-impact cardio",
                     "Burns calories effectively",
                     "Good for cardiovascular health"
-                ]
+                ],
+                image: require('@/assets/images/exercises/treadmill_walk.png')
             },
             {
                 name: "Stationary Bike",
@@ -340,7 +351,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Low impact on joints",
                     "Improves cardiovascular fitness",
                     "Great for active recovery"
-                ]
+                ],
+                image: require('@/assets/images/exercises/stationary_bike.png')
             },
             {
                 name: "Dead Bug",
@@ -367,7 +379,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Builds core stability",
                     "Beginner-friendly ab exercise",
                     "Protects lower back"
-                ]
+                ],
+                image: require('@/assets/images/exercises/dead_bug.png')
             },
             {
                 name: "Bird Dog",
@@ -394,7 +407,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Improves core stability",
                     "Great for lower back health",
                     "Develops coordination"
-                ]
+                ],
+                image: require('@/assets/images/exercises/bird_dog.png')
             },
             {
                 name: "Glute Bridge",
@@ -421,7 +435,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Strengthens glutes and core",
                     "Good for hip mobility",
                     "Safe and effective"
-                ]
+                ],
+                image: require('@/assets/images/exercises/glute_bridge.png')
             }
         ]
     },
@@ -454,7 +469,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Safe shoulder strengthening",
                     "Stable and controlled",
                     "Great for beginners"
-                ]
+                ],
+                image: require('@/assets/images/exercises/shoulder_press.png')
             },
             {
                 name: "Lat Pulldown (Wide Grip)",
@@ -481,7 +497,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Develops back width",
                     "Beginner-friendly pull movement",
                     "Builds toward pull-ups"
-                ]
+                ],
+                image: require('@/assets/images/exercises/lat_pulldown.png')
             },
             {
                 name: "Machine Row",
@@ -508,7 +525,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Builds back thickness",
                     "Safe and stable",
                     "Great for posture"
-                ]
+                ],
+                image: require('@/assets/images/exercises/dumbbell_row.png')
             },
             {
                 name: "Incline Dumbbell Press",
@@ -535,7 +553,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Targets upper chest",
                     "Balanced chest development",
                     "Functional pressing strength"
-                ]
+                ],
+                image: require('@/assets/images/exercises/incline_dumbbell_press.png')
             },
             {
                 name: "Face Pull",
@@ -562,7 +581,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Great for shoulder health",
                     "Improves posture",
                     "Balances push exercises"
-                ]
+                ],
+                image: require('@/assets/images/exercises/face_pull.png')
             }
         ]
     },
@@ -595,7 +615,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Teaches proper squat form",
                     "Great for leg strength",
                     "Beginner-friendly squat variant"
-                ]
+                ],
+                image: require('@/assets/images/exercises/squat.png')
             },
             {
                 name: "Step-Ups",
@@ -622,7 +643,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Unilateral leg strength",
                     "Improves balance",
                     "Functional movement"
-                ]
+                ],
+                image: require('@/assets/images/exercises/step_ups.png')
             },
             {
                 name: "Hip Abductor Machine",
@@ -649,7 +671,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Strengthens hip muscles",
                     "Improves hip stability",
                     "Helps prevent knee issues"
-                ]
+                ],
+                image: require('@/assets/images/exercises/hip_abductor_machine.png')
             },
             {
                 name: "Hip Adductor Machine",
@@ -676,7 +699,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Strengthens inner thighs",
                     "Improves hip stability",
                     "Balances leg development"
-                ]
+                ],
+                image: require('@/assets/images/exercises/hip_adductor_machine.png')
             },
             {
                 name: "Seated Calf Raise",
@@ -703,7 +727,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Targets lower calf muscle",
                     "Completes calf development",
                     "Improves ankle stability"
-                ]
+                ],
+                image: require('@/assets/images/exercises/seated_calf_raise.png')
             }
         ]
     },
@@ -736,7 +761,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Isolates chest muscles",
                     "Safe for beginners",
                     "Great chest finisher"
-                ]
+                ],
+                image: require('@/assets/images/exercises/machine_chest_fly.png')
             },
             {
                 name: "Dumbbell Romanian Deadlift",
@@ -763,7 +789,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Strengthens posterior chain",
                     "Improves hip hinge pattern",
                     "Great for hamstring development"
-                ]
+                ],
+                image: require('@/assets/images/exercises/dumbbell_romanian_deadlift.png')
             },
             {
                 name: "Plank",
@@ -790,7 +817,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Builds core stability",
                     "Strengthens entire core",
                     "Functional fitness"
-                ]
+                ],
+                image: require('@/assets/images/exercises/plank.png')
             },
             {
                 name: "Stretching Routine",
@@ -817,7 +845,8 @@ export const LEVEL1_WORKOUTS: WorkoutDay[] = [
                     "Improves flexibility",
                     "Aids recovery",
                     "Reduces injury risk"
-                ]
+                ],
+                image: require('@/assets/images/exercises/stretching_routine.png')
             },
             {
                 name: "Foam Rolling",

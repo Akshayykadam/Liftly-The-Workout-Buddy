@@ -7,6 +7,7 @@ export interface Exercise {
   dos: string[];
   donts: string[];
   benefits: string[];
+  image?: any;
 }
 
 export interface WorkoutDay {
@@ -49,7 +50,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Improves posture and reduces back pain",
           "Enhances pulling strength for daily activities",
           "Helps balance pushing exercises like bench press"
-        ]
+        ],
+        image: require('@/assets/images/exercises/dumbbell_row.png')
       },
       {
         name: "Lat Pulldown (Supine Grip)",
@@ -173,7 +175,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Improves chest peak contraction ability",
           "Safer for shoulders than traditional flys",
           "Great for chest development and muscle detail"
-        ]
+        ],
+        image: require('@/assets/images/exercises/machine_chest_fly.png')
       },
       {
         name: "Dumbbell Overhead Press",
@@ -204,7 +207,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Improves overhead strength and stability",
           "Engages core for full-body stability",
           "Develops functional pressing power"
-        ]
+        ],
+        image: require('@/assets/images/exercises/shoulder_press.png')
       },
       {
         name: "Lateral Raises",
@@ -328,7 +332,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Builds arm thickness and horseshoe shape",
           "Improves lockout strength for pressing",
           "Constant tension for muscle growth"
-        ]
+        ],
+        image: require('@/assets/images/exercises/tricep_pushdown.png')
       }
     ]
   },
@@ -365,7 +370,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Strengthens quads, glutes, hamstrings, and core",
           "Improves functional strength for daily life",
           "Boosts metabolism and hormone production"
-        ]
+        ],
+        image: require('@/assets/images/exercises/squat.png')
       },
       {
         name: "Static Lunges / Leg Extension",
@@ -396,7 +402,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Improves balance and stability",
           "Builds quad strength and definition",
           "Enhances athletic performance and jumping"
-        ]
+        ],
+        image: require('@/assets/images/exercises/lunges.png')
       },
       {
         name: "Leg Press",
@@ -427,7 +434,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Builds quad and glute mass effectively",
           "Reduces stress on lower back vs squats",
           "Excellent for leg strength and hypertrophy"
-        ]
+        ],
+        image: require('@/assets/images/exercises/leg_press.png')
       },
       {
         name: "Standing Calf",
@@ -458,7 +466,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Strengthens lower leg for running and jumping",
           "Improves ankle stability and mobility",
           "Enhances athletic performance"
-        ]
+        ],
+        image: require('@/assets/images/exercises/calf_raise_machine.png')
       },
       {
         name: "Seated Calf",
@@ -489,7 +498,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Complements standing calf raises",
           "Builds calf thickness and mass",
           "Improves lower leg endurance"
-        ]
+        ],
+        image: require('@/assets/images/exercises/seated_calf_raise.png')
       },
       {
         name: "Leg Curl",
@@ -520,7 +530,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Reduces risk of hamstring injuries",
           "Improves knee joint stability",
           "Balances quad development for leg symmetry"
-        ]
+        ],
+        image: require('@/assets/images/exercises/lying_leg_curl.png')
       }
     ]
   },
@@ -557,7 +568,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Burns calories and aids fat loss",
           "Increases stamina and lung capacity",
           "HIIT format boosts metabolism for hours"
-        ]
+        ],
+        image: require('@/assets/images/exercises/treadmill_walk.png')
       },
       {
         name: "15 mins elliptical",
@@ -619,7 +631,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Strengthens legs and glutes",
           "Improves cardiovascular fitness",
           "Great for active recovery and endurance"
-        ]
+        ],
+        image: require('@/assets/images/exercises/stationary_bike.png')
       },
       {
         name: "Jumping jacks",
@@ -650,7 +663,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Improves coordination and agility",
           "Elevates heart rate quickly",
           "Burns calories and improves endurance"
-        ]
+        ],
+        image: require('@/assets/images/exercises/jumping_jacks.png')
       },
       {
         name: "Mountain climbers",
@@ -805,7 +819,8 @@ export const WORKOUTS: WorkoutDay[] = [
           "Strengthens entire core, shoulders, and back",
           "Improves posture and reduces back pain",
           "Functional strength for everyday activities"
-        ]
+        ],
+        image: require('@/assets/images/exercises/plank.png')
       }
     ]
   },
