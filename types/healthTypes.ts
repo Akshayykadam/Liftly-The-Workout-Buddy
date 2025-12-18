@@ -152,6 +152,7 @@ export interface HealthDashboardData {
         current?: number;
         resting?: number;
         history?: { date: Date; min: number; max: number; avg: number }[];
+        samples?: HeartRateSample[];
         lastUpdated?: string;
     } | null;
     calories: {

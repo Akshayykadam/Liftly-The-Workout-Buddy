@@ -22,6 +22,7 @@ import type {
     HeartRateData,
     RestingHeartRateData,
     CaloriesData,
+    HeartRateSample,
     BodyMeasurements,
     SleepSession,
     SleepStage,
@@ -484,6 +485,41 @@ export const getLatestHeartRate = async (): Promise<number | null> => {
     } catch (error) {
         console.error('Error fetching latest heart rate:', error);
         return null;
+    }
+};
+
+/**
+ * Get heart rate samples for today (00:00 - now)
+ */
+export const getTodayHeartRateSamples = async (): Promise<HeartRateSample[]> => {
+    if (!isAndroid()) return [];
+
+    try {
+        const now = new Date();
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const { records } = await readRecords('HeartRate', {
+            timeRangeFilter: {
+                operator: 'between',
+                startTime: startOfDay.toISOString(),
+                endTime: now.toISOString(),
+            },
+        });
+
+        if (records.length === 0) return [];
+
+        const samples = records.flatMap((record: any) =>
+            (record.samples || []).map((sample: any) => ({
+                beatsPerMinute: sample.beatsPerMinute,
+                time: sample.time,
+            }))
+        );
+
+        return samples;
+    } catch (error) {
+        console.error('Error fetching today samples:', error);
+        return [];
     }
 };
 

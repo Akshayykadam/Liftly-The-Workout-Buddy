@@ -36,7 +36,7 @@ import {
 import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import { HealthPermissionsModal } from '@/components/HealthPermissionsModal';
 import Svg, { Circle, Path, Defs, LinearGradient, Stop, Line, Text as SvgText } from 'react-native-svg';
-import type { ExerciseSession, SleepStage } from '@/types/healthTypes';
+import type { ExerciseSession, SleepStage, HeartRateSample } from '@/types/healthTypes';
 
 const COLORS = {
     black: '#000000',
@@ -359,13 +359,15 @@ export default function HealthTabScreen() {
                                                 </View>
                                             </View>
                                         </View>
-                                        {heartRateData.resting && (
+                                    </View>
+                                    {heartRateData.resting && (
+                                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                                             <View style={styles.heartRateRestingBadge}>
                                                 <Text style={styles.heartRateRestingBadgeLabel}>Resting</Text>
                                                 <Text style={styles.heartRateRestingBadgeValue}>{heartRateData.resting} bpm</Text>
                                             </View>
-                                        )}
-                                    </View>
+                                        </View>
+                                    )}
 
                                     {/* Heart Rate Stats Grid */}
                                     {heartRateData.history && heartRateData.history.length > 0 && (
@@ -424,9 +426,16 @@ export default function HealthTabScreen() {
                                 </View>
 
                                 {/* Heart Rate History Chart */}
-                                {heartRateData.history && heartRateData.history.length > 0 && (
+                                {/* Heart Rate History Chart */}
+                                {heartRateData.samples && heartRateData.samples.length > 0 ? (
                                     <View style={[styles.chartContainer, { marginTop: 12 }]}>
-                                        <HeartRateChart data={heartRateData.history} />
+                                        <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginBottom: 8, marginLeft: 8 }}>Today's Timeline</Text>
+                                        <DailyHeartRateChart samples={heartRateData.samples} />
+                                    </View>
+                                ) : heartRateData.history && heartRateData.history.length > 0 && (
+                                    <View style={[styles.chartContainer, { marginTop: 12 }]}>
+                                        <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginBottom: 8, marginLeft: 8 }}>7-Day History</Text>
+                                        {/* Fallback to simple viz if needed, but primarily focusing on Today as requested */}
                                     </View>
                                 )}
                             </View>
@@ -697,70 +706,110 @@ export default function HealthTabScreen() {
 }
 
 // Heart Rate Chart Component
-const HeartRateChart = ({ data }: { data: Array<{ date: Date; min: number; max: number; avg: number }> }) => {
-    const height = 120;
-    const width = SCREEN_WIDTH - 96; // Reduced width to fit within padded container
-    const padding = { top: 15, bottom: 25, left: 30, right: 15 };
+// Daily Heart Rate Chart Component (00:00 - 23:59)
+const DailyHeartRateChart = ({ samples }: { samples: HeartRateSample[] }) => {
+    const height = 150;
+    const width = SCREEN_WIDTH - 80;
+    const padding = { top: 20, bottom: 30, left: 35, right: 15 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
 
     const chartData = useMemo(() => {
-        if (data.length === 0) return null;
+        if (!samples || samples.length === 0) return null;
 
-        // If only 1 data point, duplicate it to create a flat line or handle specifically
-        let processData = [...data];
-        if (processData.length === 1) {
-            // Push a dummy point to make a line
-            processData.push({ ...processData[0], date: new Date(processData[0].date.getTime() + 1000) });
-        }
+        // Sort samples by time
+        const sortedSamples = [...samples].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-        const allMins = processData.map(d => d.min);
-        const allMaxs = processData.map(d => d.max);
+        // Calculate Y scale (BPM)
+        const bpms = sortedSamples.map(s => s.beatsPerMinute);
+        const minBpm = Math.min(...bpms);
+        const maxBpm = Math.max(...bpms);
+        // Add padding to Y scale
+        const yMin = Math.max(40, minBpm - 5);
+        const yMax = Math.max(100, maxBpm + 5);
+        const yRange = yMax - yMin;
 
-        // Add more breathing room
-        const minVal = Math.min(...allMins) - 5;
-        const maxVal = Math.max(...allMaxs) + 5;
-        const yRange = maxVal - minVal || 10; // Ensure range is never 0
+        // Calculate X scale (Time: 00:00 to 23:59 in minutes)
+        // We'll map the actual sample time to the day's timeline
+        const getMinutes = (dateStr: string) => {
+            const d = new Date(dateStr);
+            return d.getHours() * 60 + d.getMinutes();
+        };
 
-        const chartWidth = width - padding.left - padding.right;
-        const chartHeight = height - padding.top - padding.bottom;
+        // Use earliest and latest sample time for dynamic range, OR fixed 0-24h
+        // User asked for "today's all... 12am to 11:50pm", so fixed 0-24h (1440 mins) is safer for context
+        const xMin = 0;
+        const xMax = 1440; // 24 hours * 60 minutes
 
-        const points = processData.map((d, i) => {
-            // Distribute points evenly
-            const x = padding.left + (i / (processData.length - 1)) * chartWidth;
-            const y = padding.top + (1 - (d.avg - minVal) / yRange) * chartHeight;
-            return { x, y, ...d };
+        const points = sortedSamples.map(sample => {
+            const mins = getMinutes(sample.time);
+            const x = padding.left + (mins / 1440) * chartWidth;
+            const y = padding.top + (1 - (sample.beatsPerMinute - yMin) / yRange) * chartHeight;
+            return { x, y, val: sample.beatsPerMinute, time: sample.time };
         });
 
-        let path = `M ${points[0].x} ${points[0].y}`;
-        for (let i = 1; i < points.length; i++) {
-            path += ` L ${points[i].x} ${points[i].y}`;
+        // Create Path
+        let path = "";
+        if (points.length > 0) {
+            path = `M ${points[0].x} ${points[0].y}`;
+            for (let i = 1; i < points.length; i++) {
+                path += ` L ${points[i].x} ${points[i].y}`;
+            }
         }
 
-        return { points, path, minVal, maxVal };
-    }, [data, width, height]);
+        return { points, path, yMin, yMax };
+    }, [samples, width, height]);
 
-    if (!chartData) return null;
+    if (!chartData) return <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginVertical: 20 }}>No data for today</Text>;
 
     return (
-        <Svg width={width} height={height}>
-            <Defs>
-                <LinearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor={COLORS.red} stopOpacity="0.3" />
-                    <Stop offset="100%" stopColor={COLORS.red} stopOpacity="0" />
-                </LinearGradient>
-            </Defs>
-            <Path d={chartData.path} stroke={COLORS.red} strokeWidth={2.5} fill="none" strokeLinecap="round" />
-            {chartData.points.map((point, i) => (
-                <Circle
-                    key={i}
-                    cx={point.x}
-                    cy={point.y}
-                    r={i === chartData.points.length - 1 ? 5 : 3}
-                    fill={i === chartData.points.length - 1 ? COLORS.red : COLORS.surface}
-                    stroke={COLORS.red}
-                    strokeWidth={2}
+        <View>
+            <Svg width={width} height={height}>
+                <Defs>
+                    <LinearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0%" stopColor={COLORS.red} stopOpacity="0.4" />
+                        <Stop offset="100%" stopColor={COLORS.red} stopOpacity="0" />
+                    </LinearGradient>
+                </Defs>
+
+                {/* Grid Lines (Horizontal) */}
+                {[0, 0.5, 1].map((ratio) => {
+                    const y = padding.top + ratio * chartHeight;
+                    return <Line key={ratio} x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={COLORS.border} strokeWidth={1} strokeDasharray="4 4" />;
+                })}
+
+                {/* Y-Axis Labels (BPM) */}
+                <SvgText x={padding.left - 8} y={padding.top + 4} fill={COLORS.textSecondary} fontSize="10" textAnchor="end">{Math.round(chartData.yMax)}</SvgText>
+                <SvgText x={padding.left - 8} y={height - padding.bottom} fill={COLORS.textSecondary} fontSize="10" textAnchor="end">{Math.round(chartData.yMin)}</SvgText>
+
+                {/* X-Axis Labels (Time) */}
+                <SvgText x={padding.left} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">12 AM</SvgText>
+                <SvgText x={width / 2} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">12 PM</SvgText>
+                <SvgText x={width - padding.right} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">11:59 PM</SvgText>
+
+                {/* Chart Line */}
+                <Path d={chartData.path} stroke={COLORS.red} strokeWidth={2} fill="none" />
+
+                {/* Area under curve (Optional, using fill) */}
+                <Path
+                    d={`${chartData.path} L ${chartData.points[chartData.points.length - 1].x} ${height - padding.bottom} L ${chartData.points[0].x} ${height - padding.bottom} Z`}
+                    fill="url(#hrGradient)"
+                    stroke="none"
                 />
-            ))}
-        </Svg>
+
+                {/* Dots for significant changes or just endpoints */}
+                {chartData.points.filter((_, i) => i === 0 || i === chartData.points.length - 1).map((point, i) => (
+                    <Circle
+                        key={i}
+                        cx={point.x}
+                        cy={point.y}
+                        r={3}
+                        fill={COLORS.red}
+                    />
+                ))}
+
+            </Svg>
+        </View>
     );
 };
 
