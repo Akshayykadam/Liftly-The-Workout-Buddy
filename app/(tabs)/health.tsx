@@ -246,90 +246,51 @@ export default function HealthTabScreen() {
                     </View>
                 ) : (
                     <>
-                        {/* Health Score Card */}
-                        <View style={styles.healthScoreCard}>
-                            <View style={styles.healthScoreHeader}>
-                                <Sparkles size={20} color={COLORS.accent} />
-                                <Text style={styles.healthScoreTitle}>Today's Health Score</Text>
-                            </View>
-                            <View style={styles.healthScoreContent}>
-                                <View style={styles.healthScoreRing}>
-                                    <Text style={[
-                                        styles.healthScoreValue,
-                                        { color: healthScore.overall >= 70 ? COLORS.green : healthScore.overall >= 50 ? COLORS.yellow : COLORS.red }
-                                    ]}>
-                                        {healthScore.overall}
-                                    </Text>
-                                    <Text style={styles.healthScoreMax}>/100</Text>
+                        {/* Compact Stats Row */}
+                        <View style={styles.compactRow}>
+                            {/* Compact Health Score Card */}
+                            <View style={[styles.compactCard, { flex: 0.45 }]}>
+                                <View style={styles.compactHeader}>
+                                    <Sparkles size={16} color={COLORS.accent} />
+                                    <Text style={styles.compactTitle}>Health Score</Text>
                                 </View>
-                                <View style={styles.healthScoreBreakdown}>
-                                    <View style={styles.scoreItem}>
-                                        <Footprints size={14} color={COLORS.blue} />
-                                        <Text style={styles.scoreItemLabel}>Steps</Text>
-                                        <Text style={styles.scoreItemValue}>{healthScore.breakdown.steps}</Text>
-                                    </View>
-                                    <View style={styles.scoreItem}>
-                                        <Moon size={14} color={COLORS.purple} />
-                                        <Text style={styles.scoreItemLabel}>Sleep</Text>
-                                        <Text style={styles.scoreItemValue}>{healthScore.breakdown.sleep}</Text>
-                                    </View>
-                                    <View style={styles.scoreItem}>
-                                        <Zap size={14} color={COLORS.orange} />
-                                        <Text style={styles.scoreItemLabel}>Exercise</Text>
-                                        <Text style={styles.scoreItemValue}>{healthScore.breakdown.exercise}</Text>
-                                    </View>
-                                    <View style={styles.scoreItem}>
-                                        <Heart size={14} color={COLORS.red} />
-                                        <Text style={styles.scoreItemLabel}>Heart</Text>
-                                        <Text style={styles.scoreItemValue}>{healthScore.breakdown.heartRate}</Text>
+                                <View style={styles.compactContent}>
+                                    <View style={styles.compactRingContainer}>
+                                        <Svg width={70} height={70}>
+                                            <Circle cx={35} cy={35} r={30} stroke={COLORS.border} strokeWidth={6} fill="none" />
+                                            <Circle
+                                                cx={35}
+                                                cy={35}
+                                                r={30}
+                                                stroke={healthScore.overall >= 70 ? COLORS.green : healthScore.overall >= 50 ? COLORS.yellow : COLORS.red}
+                                                strokeWidth={6}
+                                                fill="none"
+                                                strokeDasharray={[Math.PI * 60, Math.PI * 60]}
+                                                strokeDashoffset={Math.PI * 60 * (1 - healthScore.overall / 100)}
+                                                strokeLinecap="round"
+                                                rotation="-90"
+                                                origin="35, 35"
+                                            />
+                                        </Svg>
+                                        <View style={styles.compactRingText}>
+                                            <Text style={styles.compactValue}>{healthScore.overall}</Text>
+                                        </View>
                                     </View>
                                 </View>
                             </View>
-                            {insights.length > 0 && (
-                                <View style={styles.insightsContainer}>
-                                    {insights.map((insight, idx) => {
-                                        const iconColor = insight.type === 'positive' ? COLORS.green : insight.type === 'warning' ? COLORS.orange : COLORS.textSecondary;
-                                        const InsightIcon = insight.icon === 'award' ? Award : insight.icon === 'footprints' ? Footprints : insight.icon === 'moon' ? Moon : Zap;
-                                        return (
-                                            <View key={idx} style={[
-                                                styles.insightBadge,
-                                                { backgroundColor: insight.type === 'positive' ? COLORS.green + '20' : insight.type === 'warning' ? COLORS.orange + '20' : COLORS.surfaceLight }
-                                            ]}>
-                                                <InsightIcon size={14} color={iconColor} />
-                                                <Text style={styles.insightText}>{insight.message}</Text>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                            )}
-                        </View>
 
-                        {/* Steps Card - Linear Design */}
-                        <View style={styles.stepsCard}>
-                            <View style={styles.stepsCardHeader}>
-                                <View style={styles.stepsCardLeft}>
-                                    <Footprints size={22} color={COLORS.accent} strokeWidth={2.5} />
-                                    <Text style={styles.stepsCardTitle}>Daily Steps</Text>
+                            {/* Compact Steps Card */}
+                            <View style={[styles.compactCard, { flex: 0.55 }]}>
+                                <View style={styles.compactHeader}>
+                                    <Footprints size={16} color={COLORS.accent} />
+                                    <Text style={styles.compactTitle}>Steps</Text>
                                 </View>
-                                <Text style={styles.stepsCardValue}>
-                                    {currentSteps.toLocaleString()} / {stepGoal.toLocaleString()}
-                                </Text>
-                            </View>
-                            <View style={styles.stepsProgressBarContainer}>
-                                <View style={[styles.stepsProgressBar, { width: `${Math.min(stepProgress, 100)}%` }]} />
-                            </View>
-                            <View style={styles.stepsStatsRow}>
-                                <View style={styles.stepsStatItem}>
-                                    <Text style={styles.stepsStatValue}>{Math.round(stepProgress)}%</Text>
-                                    <Text style={styles.stepsStatLabel}>Progress</Text>
-                                </View>
-                                <View style={styles.stepsStatItem}>
-                                    <Text style={styles.stepsStatValue}>{weeklyAverage.toLocaleString()}</Text>
-                                    <Text style={styles.stepsStatLabel}>Daily Avg</Text>
-                                </View>
-                                <View style={styles.stepsStatItem}>
-                                    <Text style={styles.stepsStatValue}>{stepGoal.toLocaleString()}</Text>
-                                    <Text style={styles.stepsStatLabel}>Goal</Text>
+                                <View style={styles.compactContent}>
+                                    <Text style={styles.compactBigValue}>{currentSteps.toLocaleString()}</Text>
+                                    <Text style={styles.compactSubtitle}>Goal: {stepGoal.toLocaleString()}</Text>
+                                    <View style={styles.compactProgressBar}>
+                                        <View style={[styles.compactProgressFill, { width: `${Math.min(stepProgress, 100)}%` }]} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -596,76 +557,95 @@ export default function HealthTabScreen() {
                         )}
 
                         {/* Sleep */}
-                        {showHealthConnectFeatures && sleepData?.lastSession && (
+                        {showHealthConnectFeatures && sleepData?.recentSessions && sleepData.recentSessions.length > 0 && (
                             <View style={styles.section}>
-                                <Text style={styles.sectionTitle}>Last Night's Sleep</Text>
-                                <View style={styles.sleepCard}>
-                                    <View style={styles.sleepHeader}>
-                                        <View style={styles.sleepIconContainer}>
-                                            <Moon size={24} color={COLORS.purple} />
-                                        </View>
-                                        <View>
-                                            <View style={styles.sleepDurationRow}>
-                                                <Text style={styles.sleepHours}>
-                                                    {formatDuration(sleepData.lastSession.durationMinutes)}
-                                                </Text>
-                                                <Text style={styles.sleepLabel}>Duration</Text>
-                                            </View>
-                                            <Text style={styles.sleepTime}>
-                                                {formatTime(sleepData.lastSession.startTime)} - {formatTime(sleepData.lastSession.endTime)}
-                                            </Text>
-                                        </View>
-                                    </View>
+                                <Text style={styles.sectionTitle}>Recent Sleep</Text>
+                                {sleepData.recentSessions.map((session, index) => {
+                                    // Helper function for sleep stage color
+                                    const getStageColor = (stage: string) => {
+                                        switch (stage) {
+                                            case 'DEEP': return '#3D3B8E';
+                                            case 'LIGHT': return '#6D67E4';
+                                            case 'REM': return '#9F97F7';
+                                            case 'AWAKE': return '#FFAB76';
+                                            default: return COLORS.border;
+                                        }
+                                    };
 
-                                    {/* Sleep Stages Visualization */}
-                                    {sleepData.lastSession.stages && sleepData.lastSession.stages.length > 0 && (
-                                        <View style={styles.sleepStagesContainer}>
-                                            <View style={styles.sleepStageBar}>
-                                                {sleepData.lastSession.stages.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()).map((stage, index) => {
-                                                    const totalDuration = sleepData!.lastSession!.durationMinutes;
-                                                    const widthPercent = (stage.durationMinutes / totalDuration) * 100;
+                                    const isLast = index === sleepData.recentSessions!.length - 1;
+                                    const dateLabel = new Date(session.endTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-                                                    let backgroundColor = COLORS.border;
-                                                    if (stage.stage === 'DEEP') backgroundColor = '#3D3B8E';
-                                                    if (stage.stage === 'LIGHT') backgroundColor = '#6D67E4';
-                                                    if (stage.stage === 'REM') backgroundColor = '#9F97F7';
-                                                    if (stage.stage === 'AWAKE') backgroundColor = '#FFAB76';
-
-                                                    if (widthPercent <= 0) return null;
-
-                                                    return (
-                                                        <View
-                                                            key={index}
-                                                            style={{
-                                                                width: `${widthPercent}%`,
-                                                                backgroundColor,
-                                                                height: '100%'
-                                                            }}
-                                                        />
-                                                    );
-                                                })}
-                                            </View>
-                                            <View style={styles.sleepStageLabels}>
-                                                <View style={styles.sleepStageLegendItem}>
-                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#3D3B8E' }]} />
-                                                    <Text style={styles.sleepLegendText}>Deep</Text>
+                                    return (
+                                        <View key={session.id || index} style={[styles.sleepCard, !isLast && { marginBottom: 16 }]}>
+                                            <View style={styles.sleepHeader}>
+                                                <View style={styles.sleepIconContainer}>
+                                                    <Moon size={24} color={COLORS.purple} />
                                                 </View>
-                                                <View style={styles.sleepStageLegendItem}>
-                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#6D67E4' }]} />
-                                                    <Text style={styles.sleepLegendText}>Light</Text>
-                                                </View>
-                                                <View style={styles.sleepStageLegendItem}>
-                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#9F97F7' }]} />
-                                                    <Text style={styles.sleepLegendText}>REM</Text>
-                                                </View>
-                                                <View style={styles.sleepStageLegendItem}>
-                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#FFAB76' }]} />
-                                                    <Text style={styles.sleepLegendText}>Awake</Text>
+                                                <View>
+                                                    <View style={styles.sleepDurationRow}>
+                                                        <Text style={styles.sleepHours}>
+                                                            {formatDuration(session.durationMinutes)}
+                                                        </Text>
+                                                        <Text style={styles.sleepLabel}>Duration • {dateLabel}</Text>
+                                                    </View>
+                                                    <Text style={styles.sleepTime}>
+                                                        {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                                                    </Text>
                                                 </View>
                                             </View>
+
+                                            {/* Sleep Stages Visualization */}
+                                            {session.stages && session.stages.length > 0 && (
+                                                <View style={{ marginTop: 16 }}>
+                                                    <View style={{ flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden', width: '100%', backgroundColor: COLORS.surfaceLight }}>
+                                                        {[...session.stages].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()).map((stage, idx) => {
+                                                            const totalDuration = session.durationMinutes;
+                                                            if (!totalDuration || totalDuration <= 0) return null;
+
+                                                            const widthPercent = (stage.durationMinutes / totalDuration) * 100;
+                                                            const backgroundColor = getStageColor(stage.stage);
+
+                                                            if (widthPercent <= 0) return null;
+
+                                                            return (
+                                                                <View
+                                                                    key={idx}
+                                                                    style={{
+                                                                        width: `${widthPercent}%`,
+                                                                        backgroundColor,
+                                                                        height: '100%'
+                                                                    }}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </View>
+
+                                                    {/* Legend */}
+                                                    {index === 0 && (
+                                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingHorizontal: 4 }}>
+                                                            <View style={styles.sleepStageLegendItem}>
+                                                                <View style={[styles.sleepLegendDot, { backgroundColor: '#3D3B8E' }]} />
+                                                                <Text style={styles.sleepLegendText}>Deep</Text>
+                                                            </View>
+                                                            <View style={styles.sleepStageLegendItem}>
+                                                                <View style={[styles.sleepLegendDot, { backgroundColor: '#6D67E4' }]} />
+                                                                <Text style={styles.sleepLegendText}>Light</Text>
+                                                            </View>
+                                                            <View style={styles.sleepStageLegendItem}>
+                                                                <View style={[styles.sleepLegendDot, { backgroundColor: '#9F97F7' }]} />
+                                                                <Text style={styles.sleepLegendText}>REM</Text>
+                                                            </View>
+                                                            <View style={styles.sleepStageLegendItem}>
+                                                                <View style={[styles.sleepLegendDot, { backgroundColor: '#FFAB76' }]} />
+                                                                <Text style={styles.sleepLegendText}>Awake</Text>
+                                                            </View>
+                                                        </View>
+                                                    )}
+                                                </View>
+                                            )}
                                         </View>
-                                    )}
-                                </View>
+                                    );
+                                })}
                             </View>
                         )}
 
@@ -913,9 +893,32 @@ const styles = StyleSheet.create({
     sleepDuration: { flex: 1 },
     sleepHours: { fontSize: 24, fontWeight: '700', color: COLORS.textPrimary },
     sleepTime: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
+    // Missing Sleep Styles
+    sleepIconContainer: { width: 44, height: 44, borderRadius: 12, backgroundColor: COLORS.purple + '20', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+    sleepDurationRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+    sleepLabel: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '500' },
+    sleepStagesContainer: { marginTop: 16, height: 50 },
+    sleepStageBar: { flexDirection: 'row', height: 8, borderRadius: 4, overflow: 'hidden', width: '100%' },
+    sleepStageLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingHorizontal: 4 },
+    sleepStageLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    sleepLegendDot: { width: 6, height: 6, borderRadius: 3 },
+    sleepLegendText: { fontSize: 10, color: COLORS.textSecondary },
     // Body
     bodyRow: { flexDirection: 'row', gap: 10 },
     bodyCard: { flex: 1, backgroundColor: COLORS.surface, borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border },
     bodyValue: { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginTop: 8 },
     bodyUnit: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
+    // Compact UI
+    compactRow: { flexDirection: 'row', gap: 12, marginBottom: 20 },
+    compactCard: { backgroundColor: COLORS.surface, borderRadius: 18, padding: 14, borderWidth: 1, borderColor: COLORS.border, height: 130 },
+    compactHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
+    compactTitle: { fontSize: 14, fontWeight: '600', color: COLORS.textSecondary },
+    compactContent: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    compactRingContainer: { position: 'relative', width: 70, height: 70, alignItems: 'center', justifyContent: 'center' },
+    compactRingText: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+    compactValue: { fontSize: 22, fontWeight: '700', color: COLORS.textPrimary },
+    compactBigValue: { fontSize: 26, fontWeight: '700', color: COLORS.textPrimary },
+    compactSubtitle: { fontSize: 11, color: COLORS.textSecondary, marginTop: 4, marginBottom: 8 },
+    compactProgressBar: { width: '100%', height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: 'hidden' },
+    compactProgressFill: { height: '100%', backgroundColor: COLORS.accent, borderRadius: 3 },
 });

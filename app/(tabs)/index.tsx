@@ -14,7 +14,8 @@ import {
   Modal,
   Pressable,
   TextInput,
-  Image
+  Image,
+  LayoutAnimation
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -66,6 +67,7 @@ export default function HomeScreen() {
   }, [currentSteps, stepGoal, celebratedSteps, isAvailable]);
 
   const handleToggleComplete = (exerciseName: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     toggleCompletion(exerciseName);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
@@ -624,7 +626,7 @@ const styles = StyleSheet.create({
   cardExerciseImage: {
     width: 60,
     height: 60,
-    borderRadius: 12,
+    borderRadius: 30,
     marginRight: 16,
     backgroundColor: COLORS.border
   },

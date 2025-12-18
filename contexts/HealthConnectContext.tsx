@@ -219,7 +219,7 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 HealthConnectService.getRestingHeartRate(),
                 HealthConnectService.getTodayCalories(),
                 HealthConnectService.getBodyMeasurements(),
-                HealthConnectService.getLastNightSleep(),
+                HealthConnectService.getRecentSleepSessions(2),
             ]);
 
             // Calculate weekly totals
@@ -332,9 +332,10 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                     recentSessions: exerciseSessions.slice(0, 5), // Last 5 sessions
                     todayDurationMinutes,
                 },
-                sleep: lastNightSleep
+                sleep: lastNightSleep && lastNightSleep.length > 0
                     ? {
-                        lastSession: lastNightSleep,
+                        lastSession: lastNightSleep[0],
+                        recentSessions: lastNightSleep,
                     }
                     : null,
                 body: Object.keys(bodyMeasurements).length > 0 ? bodyMeasurements : null,

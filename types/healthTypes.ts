@@ -165,6 +165,7 @@ export interface HealthDashboardData {
     } | null;
     sleep: {
         lastSession?: SleepSession;
+        recentSessions?: SleepSession[];
         averageDurationMinutes?: number;
     } | null;
     body: BodyMeasurements | null;

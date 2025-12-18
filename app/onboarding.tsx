@@ -4,7 +4,7 @@ import { DEFAULT_REMINDER_SETTINGS } from '@/utils/notifications';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { ChevronRight, Check, Dumbbell, Target, Activity, Flame, ChevronLeft, Calendar as CalendarIcon, TrendingDown, TrendingUp, Sparkles, User, User as PersonStanding } from 'lucide-react-native';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -15,7 +15,9 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Dimensions
+    Dimensions,
+    FlatList,
+    LayoutAnimation
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -52,13 +54,15 @@ export default function OnboardingScreen() {
     const [level, setLevel] = useState<WorkoutLevel | null>(null);
     const [gender, setGender] = useState<'male' | 'female'>('male');
     const [startDay, setStartDay] = useState<number>(1); // 1=Monday default
-    const [birthYear, setBirthYear] = useState('');
+    const [age, setAge] = useState<number>(25);
 
     const slideAnim = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(1)).current;
 
     const animateToStep = (nextStep: number) => {
         const direction = nextStep > step ? 1 : -1;
+
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
         Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -111,9 +115,12 @@ export default function OnboardingScreen() {
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+        const currentYear = new Date().getFullYear();
+        const birthYear = currentYear - age;
+
         completeOnboarding({
             name,
-            birthYear: parseInt(birthYear) || undefined,
+            birthYear,
             weight: parseFloat(weight) || 0,
             height: parseFloat(height) || 0,
             weightUnit,
@@ -133,7 +140,9 @@ export default function OnboardingScreen() {
             case 0: return true; // Welcome
             case 1: return true; // Gender always has a default
             case 2: return name.trim().length >= 2;
-            case 3: return birthYear.length === 4 && parseInt(birthYear) > 1900 && parseInt(birthYear) <= new Date().getFullYear();
+            case 2: return name.trim().length >= 2;
+            case 3: return age >= 10 && age <= 100;
+            case 4: return parseFloat(weight) > 0;
             case 4: return parseFloat(weight) > 0;
             case 5: return parseFloat(height) > 0;
             case 6: return goal !== null;
@@ -163,9 +172,9 @@ export default function OnboardingScreen() {
                 );
             case 3:
                 return (
-                    <BirthYearStep
-                        birthYear={birthYear}
-                        setBirthYear={setBirthYear}
+                    <AgeStep
+                        age={age}
+                        setAge={setAge}
                     />
                 );
             case 4:
@@ -688,39 +697,100 @@ function LevelStep({ level, setLevel }: LevelStepProps) {
     );
 }
 
-interface BirthYearStepProps {
-    birthYear: string;
-    setBirthYear: (year: string) => void;
+interface AgeStepProps {
+    age: number;
+    setAge: (age: number) => void;
 }
 
-function BirthYearStep({ birthYear, setBirthYear }: BirthYearStepProps) {
-    return (
-        <ScrollView style={styles.scrollStep} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-            <View style={styles.stepContent}>
-                <View style={styles.iconContainer}>
-                    <CalendarIcon size={48} color={COLORS.accent} strokeWidth={1.5} />
-                </View>
-                <Text style={styles.stepTitle}>When were you born?</Text>
-                <Text style={styles.stepDescription}>
-                    This helps us calculate your age for accurate fitness recommendations.
+function AgeStep({ age, setAge }: AgeStepProps) {
+    const ITEM_HEIGHT = 60;
+    const flatListRef = useRef<FlatList>(null);
+    const ages = Array.from({ length: 91 }, (_, i) => i + 10); // Ages 10 to 100
+
+    useEffect(() => {
+        // Scroll to initial value after render
+        setTimeout(() => {
+            const index = ages.indexOf(age);
+            if (index !== -1 && flatListRef.current) {
+                flatListRef.current.scrollToIndex({
+                    index,
+                    animated: false,
+                    viewOffset: ITEM_HEIGHT * 2
+                });
+            }
+        }, 100);
+    }, []);
+
+    const renderItem = ({ item }: { item: number }) => {
+        const isSelected = item === age;
+        return (
+            <TouchableOpacity
+                style={[
+                    styles.agePickerItem,
+                    { height: ITEM_HEIGHT }
+                ]}
+                onPress={() => {
+                    setAge(item);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    flatListRef.current?.scrollToIndex({
+                        index: ages.indexOf(item),
+                        animated: true,
+                        viewOffset: ITEM_HEIGHT * 2
+                    });
+                }}
+            >
+                <Text style={[
+                    styles.agePickerText,
+                    isSelected && styles.agePickerTextSelected
+                ]}>
+                    {item}
                 </Text>
-                <TextInput
-                    style={[styles.textInput, styles.numberInput]}
-                    placeholder="YYYY"
-                    placeholderTextColor={COLORS.textSecondary}
-                    value={birthYear}
-                    onChangeText={(text) => {
-                        // Only allow numbers and max 4 digits
-                        if (/^\d{0,4}$/.test(text)) {
-                            setBirthYear(text);
+            </TouchableOpacity>
+        );
+    };
+
+    return (
+        <View style={styles.stepContent}>
+            <View style={styles.iconContainer}>
+                <CalendarIcon size={48} color={COLORS.accent} strokeWidth={1.5} />
+            </View>
+            <Text style={styles.stepTitle}>How old are you?</Text>
+            <Text style={styles.stepDescription}>
+                This helps us customize your plan.
+            </Text>
+
+            <View style={styles.agePickerContainer}>
+                <View style={styles.agePickerSelectionOverlay} />
+                <FlatList
+                    ref={flatListRef}
+                    data={ages}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.toString()}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={ITEM_HEIGHT}
+                    decelerationRate="fast"
+                    getItemLayout={(_, index) => ({
+                        length: ITEM_HEIGHT,
+                        offset: ITEM_HEIGHT * index,
+                        index,
+                    })}
+                    contentContainerStyle={{
+                        paddingVertical: ITEM_HEIGHT * 2
+                    }}
+                    onMomentumScrollEnd={(event) => {
+                        const offsetY = event.nativeEvent.contentOffset.y;
+                        const index = Math.round(offsetY / ITEM_HEIGHT);
+                        if (index >= 0 && index < ages.length) {
+                            const newAge = ages[index];
+                            if (newAge !== age) {
+                                setAge(newAge);
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            }
                         }
                     }}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                    autoFocus
                 />
             </View>
-        </ScrollView>
+        </View>
     );
 }
 
@@ -1127,5 +1197,41 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         textAlign: 'center' as const,
         fontStyle: 'italic' as const
+    },
+    agePickerContainer: {
+        height: 300,
+        backgroundColor: COLORS.surface,
+        borderRadius: 20,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        marginTop: 20,
+    },
+    agePickerSelectionOverlay: {
+        position: 'absolute',
+        top: 120, // (300 height / 2) - (60 itemHeight / 2)
+        left: 0,
+        right: 0,
+        height: 60,
+        backgroundColor: 'rgba(204, 255, 0, 0.1)',
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: COLORS.accent,
+        zIndex: 0
+    },
+    agePickerItem: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1
+    },
+    agePickerText: {
+        fontSize: 24,
+        color: COLORS.textSecondary,
+        fontWeight: '500' as const
+    },
+    agePickerTextSelected: {
+        fontSize: 32,
+        color: COLORS.accent,
+        fontWeight: '700' as const
     }
 });

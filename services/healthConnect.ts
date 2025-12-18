@@ -741,3 +741,29 @@ export const getLastNightSleep = async (): Promise<SleepSession | null> => {
         return null;
     }
 };
+
+/**
+ * Get recent sleep sessions
+ */
+export const getRecentSleepSessions = async (limit: number = 2): Promise<SleepSession[]> => {
+    if (!isAndroid()) return [];
+
+    try {
+        const now = new Date();
+        const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
+        const sessions = await getSleepSessions(threeDaysAgo, now);
+
+        if (sessions.length === 0) return [];
+
+        // Sort by end time descending (newest first)
+        const sorted = [...sessions].sort(
+            (a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()
+        );
+
+        return sorted.slice(0, limit);
+    } catch (error) {
+        console.error('Error fetching recent sleep sessions:', error);
+        return [];
+    }
+};
