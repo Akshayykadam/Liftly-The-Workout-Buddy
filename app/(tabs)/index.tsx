@@ -98,51 +98,59 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Step Progress Card - Linear Design */}
-        <TouchableOpacity
-          style={styles.stepProgressCard}
-          onPress={() => setShowGoalModal(true)}
-          activeOpacity={0.8}
-        >
-          <View style={styles.stepProgressHeader}>
-            <View style={styles.stepProgressLeft}>
-              <Footprints size={20} color={COLORS.accent} strokeWidth={2.5} />
-              <Text style={styles.stepProgressLabel}>Daily Steps</Text>
-            </View>
-            <Text style={styles.stepProgressValue}>
-              {currentSteps.toLocaleString()} / {stepGoal.toLocaleString()}
-            </Text>
-          </View>
-          <View style={styles.stepProgressBarContainer}>
-            <View style={[styles.stepProgressBar, { width: `${Math.min(stepProgress, 100)}%` }]} />
-          </View>
-          <Text style={styles.stepProgressHint}>Tap to edit goal</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginBottom: 16 }}>
+          {/* Step Progress Card - Compact */}
+          <TouchableOpacity
+            style={[styles.stepProgressCard, { flex: 1, marginHorizontal: 0, marginBottom: 0, padding: 16 }]}
+            onPress={() => setShowGoalModal(true)}
+            activeOpacity={0.8}
+          >
+            <View style={{ gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Footprints size={18} color={COLORS.accent} strokeWidth={2.5} />
+                <Text style={{ fontSize: 13, fontWeight: '600', color: COLORS.textPrimary }}>Steps</Text>
+              </View>
 
-        {/* Workout Goal Card - Linear Design */}
-        <View style={styles.stepProgressCard}>
-          <View style={styles.stepProgressHeader}>
-            <View style={styles.stepProgressLeft}>
-              <Target size={20} color={COLORS.accent} strokeWidth={2.5} />
-              <Text style={styles.stepProgressLabel}>Workout Goal</Text>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: COLORS.textPrimary }}>
+                {currentSteps.toLocaleString()}
+              </Text>
+
+              <View style={{ gap: 4 }}>
+                <View style={styles.stepProgressBarContainer}>
+                  <View style={[styles.stepProgressBar, { width: `${Math.min(stepProgress, 100)}%` }]} />
+                </View>
+                <Text style={{ fontSize: 11, color: COLORS.textSecondary }}>Goal: {stepGoal.toLocaleString()}</Text>
+              </View>
             </View>
-            <Text style={styles.stepProgressValue}>
-              {todayStats.completed} / {todayStats.total}
-            </Text>
+          </TouchableOpacity>
+
+          {/* Workout Goal Card - Compact */}
+          <View style={[styles.stepProgressCard, { flex: 1, marginHorizontal: 0, marginBottom: 0, padding: 16 }]}>
+            <View style={{ gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Target size={18} color={COLORS.accent} strokeWidth={2.5} />
+                <Text style={{ fontSize: 13, fontWeight: '600', color: COLORS.textPrimary }}>Workout</Text>
+              </View>
+
+              <Text style={{ fontSize: 20, fontWeight: '700', color: COLORS.textPrimary }}>
+                {todayStats.completed} <Text style={{ fontSize: 14, color: COLORS.textSecondary }}>/ {todayStats.total}</Text>
+              </Text>
+
+              <View style={{ gap: 4 }}>
+                <View style={styles.stepProgressBarContainer}>
+                  <View
+                    style={[
+                      styles.stepProgressBar,
+                      { width: `${Math.min((todayStats.completed / Math.max(todayStats.total, 1)) * 100, 100)}%` }
+                    ]}
+                  />
+                </View>
+                <Text style={{ fontSize: 11, color: COLORS.textSecondary }}>
+                  {todayStats.completed === todayStats.total && todayStats.total > 0 ? 'Done!' : `${todayStats.total - todayStats.completed} left`}
+                </Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.stepProgressBarContainer}>
-            <View
-              style={[
-                styles.stepProgressBar,
-                { width: `${Math.min((todayStats.completed / Math.max(todayStats.total, 1)) * 100, 100)}%` }
-              ]}
-            />
-          </View>
-          <Text style={styles.stepProgressHint}>
-            {todayStats.completed === todayStats.total && todayStats.total > 0
-              ? 'All exercises completed!'
-              : `${todayStats.total - todayStats.completed} exercises remaining`}
-          </Text>
         </View>
       </View>
 
