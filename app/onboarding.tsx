@@ -823,7 +823,7 @@ const styles = StyleSheet.create({
     numberInput: {
         flex: 1,
         textAlign: 'center',
-        fontSize: 32,
+        fontSize: 24,
         fontWeight: '700' as const
     },
     unitToggle: {

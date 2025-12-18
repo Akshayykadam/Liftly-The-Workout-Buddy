@@ -1,7 +1,7 @@
 import { useWorkout } from '@/contexts/WorkoutContext';
 import { useHealthConnect } from '@/contexts/HealthConnectContext';
 import * as Haptics from 'expo-haptics';
-import { Check, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, User, Heart } from 'lucide-react-native';
+import { Check, Target, Footprints, ChevronRight, X, Trophy, PartyPopper, User, TrendingUp } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import {
@@ -83,9 +83,9 @@ export default function HomeScreen() {
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
               style={styles.profileButton}
-              onPress={() => router.push('/health')}
+              onPress={() => router.push('/progress')}
             >
-              <Heart size={24} color={COLORS.red} />
+              <TrendingUp size={24} color={COLORS.accent} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.profileButton}
@@ -96,22 +96,30 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View style={styles.statsContainer}>
-          <TouchableOpacity
-            style={styles.statCard}
-            onPress={() => setShowGoalModal(true)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.statIconContainer}>
-              <Footprints size={24} color={COLORS.accent} strokeWidth={2.5} />
+        {/* Step Progress Card - Linear Design */}
+        <TouchableOpacity
+          style={styles.stepProgressCard}
+          onPress={() => setShowGoalModal(true)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.stepProgressHeader}>
+            <View style={styles.stepProgressLeft}>
+              <Footprints size={20} color={COLORS.accent} strokeWidth={2.5} />
+              <Text style={styles.stepProgressLabel}>Daily Steps</Text>
             </View>
-            <Text style={styles.statValue}>
-              {currentSteps >= 1000 ? `${(currentSteps / 1000).toFixed(1)}k` : currentSteps}
+            <Text style={styles.stepProgressValue}>
+              {currentSteps.toLocaleString()} / {stepGoal.toLocaleString()}
             </Text>
-            <Text style={styles.statLabel}>Steps</Text>
-          </TouchableOpacity>
+          </View>
+          <View style={styles.stepProgressBarContainer}>
+            <View style={[styles.stepProgressBar, { width: `${Math.min(stepProgress, 100)}%` }]} />
+          </View>
+          <Text style={styles.stepProgressHint}>Tap to edit goal</Text>
+        </TouchableOpacity>
 
-          <View style={styles.statCard}>
+        {/* Exercise Stats Card */}
+        <View style={styles.exerciseStatsContainer}>
+          <View style={styles.exerciseStatCard}>
             <View style={styles.statIconContainer}>
               <Target size={24} color={COLORS.accent} strokeWidth={2.5} />
             </View>
@@ -459,6 +467,64 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border
+  },
+  stepProgressCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 20,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border
+  },
+  stepProgressHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  stepProgressLeft: {
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    gap: 10
+  },
+  stepProgressLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: COLORS.textPrimary
+  },
+  stepProgressValue: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: COLORS.accent
+  },
+  stepProgressBarContainer: {
+    height: 10,
+    backgroundColor: COLORS.border,
+    borderRadius: 5,
+    overflow: 'hidden' as const
+  },
+  stepProgressBar: {
+    height: '100%' as const,
+    backgroundColor: COLORS.accent,
+    borderRadius: 5
+  },
+  stepProgressHint: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    textAlign: 'center' as const,
+    marginTop: 12
+  },
+  exerciseStatsContainer: {
+    marginHorizontal: 20
+  },
+  exerciseStatCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center' as const,
     borderWidth: 1,
     borderColor: COLORS.border
   },

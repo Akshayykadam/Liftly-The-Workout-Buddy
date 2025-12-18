@@ -124,6 +124,15 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 current: 72,
                 resting: 58,
                 lastUpdated: new Date().toISOString(),
+                history: [
+                    { date: new Date(Date.now() - 6 * 86400000), min: 52, max: 145, avg: 68 },
+                    { date: new Date(Date.now() - 5 * 86400000), min: 54, max: 138, avg: 71 },
+                    { date: new Date(Date.now() - 4 * 86400000), min: 53, max: 152, avg: 74 },
+                    { date: new Date(Date.now() - 3 * 86400000), min: 51, max: 144, avg: 69 },
+                    { date: new Date(Date.now() - 2 * 86400000), min: 55, max: 156, avg: 75 },
+                    { date: new Date(Date.now() - 1 * 86400000), min: 50, max: 148, avg: 72 },
+                    { date: new Date(), min: 56, max: 142, avg: 70 },
+                ],
             },
             calories: {
                 active: 420,

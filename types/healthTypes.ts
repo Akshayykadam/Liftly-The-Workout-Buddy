@@ -169,3 +169,55 @@ export interface HealthDashboardData {
     } | null;
     body: BodyMeasurements | null;
 }
+
+// Health Score
+export interface HealthScore {
+    overall: number; // 0-100
+    breakdown: {
+        steps: number;
+        sleep: number;
+        exercise: number;
+        heartRate: number;
+    };
+    trend: 'up' | 'down' | 'stable';
+}
+
+// Water Intake
+export interface WaterIntake {
+    glasses: number;
+    goal: number;
+    lastUpdated: string;
+}
+
+// Health Insights
+export interface HealthInsight {
+    id: string;
+    type: 'positive' | 'neutral' | 'warning';
+    icon: string;
+    message: string;
+}
+
+// Heart Rate Zones
+export type HeartRateZoneType = 'resting' | 'fatBurn' | 'cardio' | 'peak';
+
+export interface HeartRateZone {
+    zone: HeartRateZoneType;
+    minBpm: number;
+    maxBpm: number;
+    minutesInZone: number;
+    color: string;
+}
+
+// Activity Streak
+export interface ActivityStreak {
+    current: number;
+    longest: number;
+    lastActiveDate: string;
+}
+
+// Weekly Comparison
+export interface WeeklyComparison {
+    thisWeek: number;
+    lastWeek: number;
+    percentChange: number;
+}

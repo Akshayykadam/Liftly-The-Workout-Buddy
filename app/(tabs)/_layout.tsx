@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Dumbbell, Calendar, TrendingUp, User, Brain } from "lucide-react-native";
+import { Dumbbell, Calendar, Heart, Brain } from "lucide-react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -55,10 +55,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="health"
+        options={{
+          title: "Health",
+          tabBarIcon: ({ color }) => <Heart size={24} color={color} strokeWidth={2} />
+        }}
+      />
+      <Tabs.Screen
         name="progress"
         options={{
-          title: "Progress",
-          tabBarIcon: ({ color }) => <TrendingUp size={24} color={color} strokeWidth={2} />
+          href: null  // Hide from tab bar, accessible via home screen button
         }}
       />
 
