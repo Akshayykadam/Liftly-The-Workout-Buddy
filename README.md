@@ -4,6 +4,17 @@ Liftly is a premium, comprehensive React Native mobile application designed to h
 
 ## Features
 
+##UI
+
+<img src="https://github.com/user-attachments/assets/613f95c0-d305-4ab2-a2ae-c04c46d2ac77" width="150" />
+<img src="https://github.com/user-attachments/assets/5e8e3849-409b-4465-9bfa-5079c02ab909" width="150" />
+<img src="https://github.com/user-attachments/assets/57883d41-2fb0-491f-9197-de53966e6acf" width="150" />
+<img src="https://github.com/user-attachments/assets/18de48c5-196f-4625-80ae-3a4bd3bb9db4" width="150" />
+<img src="https://github.com/user-attachments/assets/4520e1b9-8c80-4985-8a1f-878681c35098" width="150" />
+<img src="https://github.com/user-attachments/assets/918c193f-e881-4f8d-9c40-02f5cf9627df" width="150" />
+<img src="https://github.com/user-attachments/assets/f8c2d2a0-3e18-48ce-bee6-b09b0dfcca7f" width="150" />
+<img src="https://github.com/user-attachments/assets/00165087-39ed-4de5-938a-d7164bdfe8e4" width="150" />
+
 ### 🏋️‍♂️ Smart Workout Tracking
 - **Structured Programs**: 6-day workout cycles tailored to 3 difficulty levels (Beginner, Intermediate, Advanced).
 - **Exercise Management**: Detailed exercise lists with sets, reps, muscle targeting, and "How to View" guides.
