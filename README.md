@@ -16,38 +16,43 @@ Liftly is a premium, comprehensive React Native mobile application designed to h
 - **Meditation**: Timed breathing exercises and meditation sessions for focus and sleep.
 
 ### 📊 Visual Progress Analytics
-- **Heart Rate Trends**: Interactive line charts visualizing daily min, max, and resting heart rate history.
-- **Step Tracking**: Real-time step counting with daily goals and progress rings.
-- **Sleep Analysis**: Deep dive into sleep stages (Deep, Light, REM) and duration trends.
-- **Weight Tracking**: Log daily weight and track changes over time with trend lines.
+- **Heart Rate Trends**: 
+    - Interactive line charts visualizing daily heart rate timeline (10-minute smoothing).
+    - Detailed min, max, average, and resting heart rate statistics.
+    - Animated entry for engaging data visualization.
+- **Step Tracking**: Real-time step counting with animated progress bars and daily goal rings.
+- **Sleep Analysis**: 
+    - Deep dive into sleep stages (Deep, Light, REM) with animated stage bars.
+    - Duration trends and sleep score insights.
+- **Weight Tracking**: Log daily weight and track changes over time with animated trend lines.
 
 ### 🏥 Advanced Health Connect Integration
 - **Real-Time Sync**: Background polling ensures your steps and health data are always up-to-date.
 - **Platform Native**: Direct integration with **Android Health Connect** for privacy-focused data access.
 - **Comprehensive Metrics**:
-  - Heart Rate (Resting & Active)
+  - Heart Rate (Granular samples + History)
   - Sleep Quality & Duration
-  - Total Calories Burned
+  - Total Calories Burned (Active vs. Resting)
   - Distance & Activity
   - Body Measurements (Weight, Height)
 
 ### 👤 Personalization & UI
-- **Extended Onboarding**: Comprehensive setup flow collecting fitness level, goals, measurements, and birth year for accurate age calculation.
+- **Extended Onboarding**: Comprehensive setup flow collecting fitness level, goals, measurements, and birth year.
 - **Premium Design**: Sleek dark mode interface with consistent color theory (Accent Green/Red).
-- **Profile Management**: customizable profile with automatic BMI and Age display.
+- **Responsive Layouts**: Fixed overflow issues and aligned labels for a polished look on all screen sizes.
+- **Profile Management**: Customizable profile with automatic BMI and Age display.
 - **Smart Reminders**: Flexible notification system for workout reminders.
-- **Interactive Modals**: Polished animations for goal setting and achievements.
 
 ## Tech Stack
 
 - **Framework**: React Native with Expo (Dev Client)
 - **Language**: TypeScript
-- **Navigation**: Expo Router (v3)
-- **State Management**: React Context & Hooks
+- **Navigation**: Expo Router (v6)
+- **State Management**: React Context & Hooks (Zustand)
 - **UI Components**: 
   - Custom components with `react-native-svg` for complex charts.
   - `lucide-react-native` for consistent iconography.
-  - Polished with `react-native-reanimated`.
+  - `react-native-reanimated` for smooth UI transitions and graph animations.
 - **Health**: `react-native-health-connect` (Android)
 - **Haptics**: `expo-haptics` for tactile feedback.
 - **Persistence**: AsyncStorage for local data saving.

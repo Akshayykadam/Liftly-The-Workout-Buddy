@@ -13,7 +13,7 @@ import {
     Check,
     Footprints
 } from 'lucide-react-native';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -23,7 +23,9 @@ import {
     Modal,
     Pressable,
     TextInput,
-    Dimensions
+    Dimensions,
+    Animated,
+    Easing,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Line, Text as SvgText, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
@@ -238,6 +240,21 @@ function StepsChart({ data }: { data: Array<{ date: Date; steps: number; dayName
 
     if (!chartData) return null;
 
+    const animatedWidth = React.useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        if (chartData) {
+            Animated.timing(animatedWidth, {
+                toValue: width,
+                duration: 1500,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
+            }).start();
+        }
+    }, [chartData, width]);
+
+    if (!chartData) return null;
+
     // Y Axis Labels
     const yLabels = useMemo(() => {
         const count = 3;
@@ -251,85 +268,89 @@ function StepsChart({ data }: { data: Array<{ date: Date; steps: number; dayName
     }, [chartData, height, chartPadding]);
 
     return (
-        <Svg width={width} height={height}>
-            <Defs>
-                <LinearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor={COLORS.blue} stopOpacity="0.3" />
-                    <Stop offset="100%" stopColor={COLORS.blue} stopOpacity="0" />
-                </LinearGradient>
-            </Defs>
+        <View>
+            <Animated.View style={{ width: animatedWidth, overflow: 'hidden' }}>
+                <Svg width={width} height={height}>
+                    <Defs>
+                        <LinearGradient id="stepsGradient" x1="0" y1="0" x2="0" y2="1">
+                            <Stop offset="0%" stopColor={COLORS.blue} stopOpacity="0.3" />
+                            <Stop offset="100%" stopColor={COLORS.blue} stopOpacity="0" />
+                        </LinearGradient>
+                    </Defs>
 
-            {/* Grid lines */}
-            {yLabels.map((label, i) => (
-                <Line
-                    key={`grid-${i}`}
-                    x1={chartPadding.left}
-                    y1={label.y}
-                    x2={width - chartPadding.right}
-                    y2={label.y}
-                    stroke={COLORS.border}
-                    strokeWidth={1}
-                />
-            ))}
+                    {/* Grid lines - Always rendered, hidden by mask */}
+                    {yLabels.map((label, i) => (
+                        <Line
+                            key={`grid-${i}`}
+                            x1={chartPadding.left}
+                            y1={label.y}
+                            x2={width - chartPadding.right}
+                            y2={label.y}
+                            stroke={COLORS.border}
+                            strokeWidth={1}
+                        />
+                    ))}
 
-            {/* Y axis labels */}
-            {yLabels.map((label, i) => (
-                <SvgText
-                    key={`ylabel-${i}`}
-                    x={chartPadding.left - 8}
-                    y={label.y + 4}
-                    fontSize={10}
-                    fill={COLORS.textSecondary}
-                    textAnchor="end"
-                >
-                    {label.value}
-                </SvgText>
-            ))}
+                    {/* Y axis labels - Rendered but masked */}
+                    {yLabels.map((label, i) => (
+                        <SvgText
+                            key={`ylabel-${i}`}
+                            x={chartPadding.left - 8}
+                            y={label.y + 4}
+                            fontSize={10}
+                            fill={COLORS.textSecondary}
+                            textAnchor="end"
+                        >
+                            {label.value}
+                        </SvgText>
+                    ))}
 
-            {/* X axis labels */}
-            {chartData.points.map((point, i) => (
-                <SvgText
-                    key={`xlabel-${i}`}
-                    x={point.x}
-                    y={height - 10}
-                    fontSize={10}
-                    fill={i === chartData.points.length - 1 ? COLORS.textPrimary : COLORS.textSecondary}
-                    textAnchor="middle"
-                    fontWeight={i === chartData.points.length - 1 ? '700' : '400'}
-                >
-                    {point.dayName}
-                </SvgText>
-            ))}
+                    {/* X axis labels */}
+                    {chartData.points.map((point, i) => (
+                        <SvgText
+                            key={`xlabel-${i}`}
+                            x={point.x}
+                            y={height - 10}
+                            fontSize={10}
+                            fill={i === chartData.points.length - 1 ? COLORS.textPrimary : COLORS.textSecondary}
+                            textAnchor="middle"
+                            fontWeight={i === chartData.points.length - 1 ? '700' : '400'}
+                        >
+                            {point.dayName}
+                        </SvgText>
+                    ))}
 
-            {/* Area fill */}
-            <Path
-                d={chartData.areaPath}
-                fill="url(#stepsGradient)"
-            />
+                    {/* Area fill */}
+                    <Path
+                        d={chartData.areaPath}
+                        fill="url(#stepsGradient)"
+                    />
 
-            {/* Line */}
-            <Path
-                d={chartData.path}
-                stroke={COLORS.blue}
-                strokeWidth={2.5}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
+                    {/* Line */}
+                    <Path
+                        d={chartData.path}
+                        stroke={COLORS.blue}
+                        strokeWidth={2.5}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
 
-            {/* Data points */}
-            {chartData.points.map((point, i) => (
-                <Circle
-                    key={`point-${i}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r={i === chartData.points.length - 1 ? 5 : 3}
-                    fill={i === chartData.points.length - 1 ? COLORS.blue : COLORS.surface}
-                    stroke={COLORS.blue}
-                    strokeWidth={2}
-                />
-            ))}
-        </Svg>
+                    {/* Data points */}
+                    {chartData.points.map((point, i) => (
+                        <Circle
+                            key={`point-${i}`}
+                            cx={point.x}
+                            cy={point.y}
+                            r={i === chartData.points.length - 1 ? 5 : 3}
+                            fill={i === chartData.points.length - 1 ? COLORS.blue : COLORS.surface}
+                            stroke={COLORS.blue}
+                            strokeWidth={2}
+                        />
+                    ))}
+                </Svg>
+            </Animated.View>
+        </View>
     );
 }
 
@@ -388,6 +409,21 @@ function WeightChart({ data, unit, height = 200, width = CHART_WIDTH, showGrid =
 
     if (!chartData) return null;
 
+    const animatedWidth = React.useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        if (chartData) {
+            Animated.timing(animatedWidth, {
+                toValue: width,
+                duration: 1500,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
+            }).start();
+        }
+    }, [chartData, width]);
+
+    if (!chartData) return null;
+
     // Generate Y axis labels
     const yLabels = useMemo(() => {
         if (!showGrid) return [];
@@ -402,70 +438,74 @@ function WeightChart({ data, unit, height = 200, width = CHART_WIDTH, showGrid =
     }, [chartData, height, showGrid, chartPadding]);
 
     return (
-        <Svg width={width} height={height}>
-            <Defs>
-                <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor={COLORS.accent} stopOpacity="0.3" />
-                    <Stop offset="100%" stopColor={COLORS.accent} stopOpacity="0" />
-                </LinearGradient>
-            </Defs>
+        <View>
+            <Animated.View style={{ width: animatedWidth, overflow: 'hidden' }}>
+                <Svg width={width} height={height}>
+                    <Defs>
+                        <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                            <Stop offset="0%" stopColor={COLORS.accent} stopOpacity="0.3" />
+                            <Stop offset="100%" stopColor={COLORS.accent} stopOpacity="0" />
+                        </LinearGradient>
+                    </Defs>
 
-            {/* Grid lines */}
-            {yLabels.map((label, i) => (
-                <Line
-                    key={i}
-                    x1={chartPadding.left}
-                    y1={label.y}
-                    x2={width - chartPadding.right}
-                    y2={label.y}
-                    stroke={COLORS.border}
-                    strokeWidth={1}
-                />
-            ))}
+                    {/* Grid lines */}
+                    {yLabels.map((label, i) => (
+                        <Line
+                            key={i}
+                            x1={chartPadding.left}
+                            y1={label.y}
+                            x2={width - chartPadding.right}
+                            y2={label.y}
+                            stroke={COLORS.border}
+                            strokeWidth={1}
+                        />
+                    ))}
 
-            {/* Y axis labels */}
-            {yLabels.map((label, i) => (
-                <SvgText
-                    key={i}
-                    x={chartPadding.left - 8}
-                    y={label.y + 4}
-                    fontSize={10}
-                    fill={COLORS.textSecondary}
-                    textAnchor="end"
-                >
-                    {label.value}
-                </SvgText>
-            ))}
+                    {/* Y axis labels */}
+                    {yLabels.map((label, i) => (
+                        <SvgText
+                            key={i}
+                            x={chartPadding.left - 8}
+                            y={label.y + 4}
+                            fontSize={10}
+                            fill={COLORS.textSecondary}
+                            textAnchor="end"
+                        >
+                            {label.value}
+                        </SvgText>
+                    ))}
 
-            {/* Area fill */}
-            <Path
-                d={chartData.areaPath}
-                fill="url(#chartGradient)"
-            />
+                    {/* Area fill */}
+                    <Path
+                        d={chartData.areaPath}
+                        fill="url(#chartGradient)"
+                    />
 
-            {/* Line */}
-            <Path
-                d={chartData.path}
-                stroke={COLORS.accent}
-                strokeWidth={2.5}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
+                    {/* Line */}
+                    <Path
+                        d={chartData.path}
+                        stroke={COLORS.accent}
+                        strokeWidth={2.5}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
 
-            {/* Data points */}
-            {chartData.points.map((point, i) => (
-                <Circle
-                    key={i}
-                    cx={point.x}
-                    cy={point.y}
-                    r={i === chartData.points.length - 1 ? 6 : 4}
-                    fill={i === chartData.points.length - 1 ? COLORS.accent : COLORS.surface}
-                    stroke={COLORS.accent}
-                    strokeWidth={2}
-                />
-            ))}
-        </Svg>
+                    {/* Data points */}
+                    {chartData.points.map((point, i) => (
+                        <Circle
+                            key={i}
+                            cx={point.x}
+                            cy={point.y}
+                            r={i === chartData.points.length - 1 ? 6 : 4}
+                            fill={i === chartData.points.length - 1 ? COLORS.accent : COLORS.surface}
+                            stroke={COLORS.accent}
+                            strokeWidth={2}
+                        />
+                    ))}
+                </Svg>
+            </Animated.View>
+        </View>
     );
 }
 

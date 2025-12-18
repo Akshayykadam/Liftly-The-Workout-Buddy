@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,8 @@ import {
     Platform,
     ScrollView,
     RefreshControl,
+    Animated,
+    Easing,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -317,7 +319,11 @@ export default function HealthTabScreen() {
                                 </Text>
                             </View>
                             <View style={styles.stepsProgressBarContainer}>
-                                <View style={[styles.stepsProgressBar, { width: `${Math.min(stepProgress, 100)}%` }]} />
+                                <AnimatedProgressBar
+                                    progress={Math.min(stepProgress, 100)}
+                                    color={COLORS.accent}
+                                    height="100%"
+                                />
                             </View>
                             <View style={styles.stepsStatsRow}>
                                 <View style={styles.stepsStatItem}>
@@ -396,11 +402,11 @@ export default function HealthTabScreen() {
                                         <View style={styles.heartRateZones}>
                                             <Text style={styles.heartRateZonesLabel}>Heart Rate Zone</Text>
                                             <View style={styles.heartRateZoneBar}>
-                                                <View style={[styles.heartRateZoneSegment, { backgroundColor: COLORS.blue, flex: 1 }]} />
-                                                <View style={[styles.heartRateZoneSegment, { backgroundColor: COLORS.green, flex: 1 }]} />
-                                                <View style={[styles.heartRateZoneSegment, { backgroundColor: COLORS.yellow, flex: 1 }]} />
-                                                <View style={[styles.heartRateZoneSegment, { backgroundColor: COLORS.orange, flex: 1 }]} />
-                                                <View style={[styles.heartRateZoneSegment, { backgroundColor: COLORS.red, flex: 1 }]} />
+                                                <AnimatedZoneSegment color={COLORS.blue} flex={1} delay={0} />
+                                                <AnimatedZoneSegment color={COLORS.green} flex={1} delay={100} />
+                                                <AnimatedZoneSegment color={COLORS.yellow} flex={1} delay={200} />
+                                                <AnimatedZoneSegment color={COLORS.orange} flex={1} delay={300} />
+                                                <AnimatedZoneSegment color={COLORS.red} flex={1} delay={400} />
                                             </View>
                                             <View style={styles.heartRateZoneLabels}>
                                                 <Text style={styles.heartRateZoneLabelText}>Rest</Text>
@@ -622,13 +628,11 @@ export default function HealthTabScreen() {
                                                             if (widthPercent <= 0) return null;
 
                                                             return (
-                                                                <View
+                                                                <AnimatedSleepSegment
                                                                     key={idx}
-                                                                    style={{
-                                                                        width: `${widthPercent}%`,
-                                                                        backgroundColor,
-                                                                        height: '100%'
-                                                                    }}
+                                                                    widthPercent={widthPercent}
+                                                                    backgroundColor={backgroundColor}
+                                                                    delay={idx * 100}
                                                                 />
                                                             );
                                                         })}
@@ -791,54 +795,135 @@ const DailyHeartRateChart = ({ samples }: { samples: HeartRateSample[] }) => {
 
     if (!chartData) return <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginVertical: 20 }}>No data for today</Text>;
 
+    const animatedWidth = useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        if (chartData) {
+            Animated.timing(animatedWidth, {
+                toValue: width,
+                duration: 1500,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false, // width layout animation
+            }).start();
+        }
+    }, [chartData, width]);
+
+    if (!chartData) return <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginVertical: 20 }}>No data for today</Text>;
+
     return (
         <View>
-            <Svg width={width} height={height}>
-                <Defs>
-                    <LinearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0%" stopColor={COLORS.red} stopOpacity="0.4" />
-                        <Stop offset="100%" stopColor={COLORS.red} stopOpacity="0" />
-                    </LinearGradient>
-                </Defs>
+            <Animated.View style={{ width: animatedWidth, overflow: 'hidden' }}>
+                <Svg width={width} height={height}>
+                    <Defs>
+                        <LinearGradient id="hrGradient" x1="0" y1="0" x2="0" y2="1">
+                            <Stop offset="0%" stopColor={COLORS.red} stopOpacity="0.4" />
+                            <Stop offset="100%" stopColor={COLORS.red} stopOpacity="0" />
+                        </LinearGradient>
+                    </Defs>
 
-                {/* Grid Lines (Horizontal) */}
-                {[0, 0.5, 1].map((ratio) => {
-                    const y = padding.top + ratio * chartHeight;
-                    return <Line key={ratio} x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={COLORS.border} strokeWidth={1} strokeDasharray="4 4" />;
-                })}
+                    {/* Grid Lines (Horizontal) - Rendered fully, but hidden by mask */}
+                    {[0, 0.5, 1].map((ratio) => {
+                        const y = padding.top + ratio * chartHeight;
+                        return <Line key={ratio} x1={padding.left} y1={y} x2={width - padding.right} y2={y} stroke={COLORS.border} strokeWidth={1} strokeDasharray="4 4" />;
+                    })}
 
-                {/* Y-Axis Labels (BPM) */}
-                <SvgText x={padding.left - 8} y={padding.top + 4} fill={COLORS.textSecondary} fontSize="10" textAnchor="end">{Math.round(chartData.yMax)}</SvgText>
-                <SvgText x={padding.left - 8} y={height - padding.bottom} fill={COLORS.textSecondary} fontSize="10" textAnchor="end">{Math.round(chartData.yMin)}</SvgText>
+                    {/* Chart Line */}
+                    <Path d={chartData.path} stroke={COLORS.red} strokeWidth={2} fill="none" />
 
-                {/* X-Axis Labels (Time) */}
-                <SvgText x={padding.left} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">12 AM</SvgText>
-                <SvgText x={width / 2} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">12 PM</SvgText>
-                <SvgText x={width - padding.right} y={height - 10} fill={COLORS.textSecondary} fontSize="10" textAnchor="middle">11:59 PM</SvgText>
-
-                {/* Chart Line */}
-                <Path d={chartData.path} stroke={COLORS.red} strokeWidth={2} fill="none" />
-
-                {/* Area under curve (Optional, using fill) */}
-                <Path
-                    d={`${chartData.path} L ${chartData.points[chartData.points.length - 1].x} ${height - padding.bottom} L ${chartData.points[0].x} ${height - padding.bottom} Z`}
-                    fill="url(#hrGradient)"
-                    stroke="none"
-                />
-
-                {/* Dots for significant changes or just endpoints */}
-                {chartData.points.filter((_, i) => i === 0 || i === chartData.points.length - 1).map((point, i) => (
-                    <Circle
-                        key={i}
-                        cx={point.x}
-                        cy={point.y}
-                        r={3}
-                        fill={COLORS.red}
+                    {/* Area under curve */}
+                    <Path
+                        d={`${chartData.path} L ${chartData.points[chartData.points.length - 1].x} ${height - padding.bottom} L ${chartData.points[0].x} ${height - padding.bottom} Z`}
+                        fill="url(#hrGradient)"
+                        stroke="none"
                     />
-                ))}
 
-            </Svg>
+                    {/* Dots */}
+                    {chartData.points.filter((_, i) => i === 0 || i === chartData.points.length - 1).map((point, i) => (
+                        <Circle
+                            key={i}
+                            cx={point.x}
+                            cy={point.y}
+                            r={3}
+                            fill={COLORS.red}
+                        />
+                    ))}
+                </Svg>
+            </Animated.View>
+            {/* Overlay Axes on top so they don't animate? Or animate them too? 
+                If we animate just the chart line, we need to separate axes.
+                For simplicity "Reveal from left" often reveals everything which looks like "loading".
+                Let's stick to revealing the whole SVG including axes for consistency, 
+                OR replicate axes outside. Revealing whole SVG is smoother implement.
+             */}
         </View>
+    );
+};
+
+// Animation Components
+const AnimatedProgressBar = ({ progress, color, height }: { progress: number, color: string, height: number | string }) => {
+    const animatedWidth = useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        Animated.timing(animatedWidth, {
+            toValue: progress,
+            duration: 1000,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
+        }).start();
+    }, [progress]);
+
+    const widthInterpolated = animatedWidth.interpolate({
+        inputRange: [0, 100],
+        outputRange: ['0%', '100%'],
+    });
+
+    return (
+        <Animated.View style={{ height: height as any, backgroundColor: color, borderRadius: 6, width: widthInterpolated }} />
+    );
+};
+
+const AnimatedZoneSegment = ({ color, flex, delay }: { color: string, flex: number, delay: number }) => {
+    const scaleY = useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        Animated.timing(scaleY, {
+            toValue: 1,
+            duration: 500,
+            delay,
+            easing: Easing.out(Easing.back(1.5)),
+            useNativeDriver: true,
+        }).start();
+    }, [delay]);
+
+    return (
+        <Animated.View style={{ flex, backgroundColor: color, transform: [{ scaleY }] }} />
+    );
+};
+
+const AnimatedSleepSegment = ({ widthPercent, backgroundColor, delay }: { widthPercent: number, backgroundColor: string, delay: number }) => {
+    const opacity = useRef(new Animated.Value(0)).current;
+    const translateX = useRef(new Animated.Value(-20)).current;
+
+    React.useEffect(() => {
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 500,
+                delay,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+                toValue: 0,
+                duration: 500,
+                delay,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            })
+        ]).start();
+    }, [delay]);
+
+    return (
+        <Animated.View style={{ width: `${widthPercent}%`, height: '100%', backgroundColor, opacity, transform: [{ translateX }] }} />
     );
 };
 
