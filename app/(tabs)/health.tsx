@@ -601,16 +601,70 @@ export default function HealthTabScreen() {
                                 <Text style={styles.sectionTitle}>Last Night's Sleep</Text>
                                 <View style={styles.sleepCard}>
                                     <View style={styles.sleepHeader}>
-                                        <Moon size={24} color={COLORS.purple} />
-                                        <View style={styles.sleepDuration}>
-                                            <Text style={styles.sleepHours}>
-                                                {formatDuration(sleepData.lastSession.durationMinutes)}
-                                            </Text>
+                                        <View style={styles.sleepIconContainer}>
+                                            <Moon size={24} color={COLORS.purple} />
+                                        </View>
+                                        <View>
+                                            <View style={styles.sleepDurationRow}>
+                                                <Text style={styles.sleepHours}>
+                                                    {formatDuration(sleepData.lastSession.durationMinutes)}
+                                                </Text>
+                                                <Text style={styles.sleepLabel}>Duration</Text>
+                                            </View>
                                             <Text style={styles.sleepTime}>
                                                 {formatTime(sleepData.lastSession.startTime)} - {formatTime(sleepData.lastSession.endTime)}
                                             </Text>
                                         </View>
                                     </View>
+
+                                    {/* Sleep Stages Visualization */}
+                                    {sleepData.lastSession.stages && sleepData.lastSession.stages.length > 0 && (
+                                        <View style={styles.sleepStagesContainer}>
+                                            <View style={styles.sleepStageBar}>
+                                                {sleepData.lastSession.stages.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()).map((stage, index) => {
+                                                    const totalDuration = sleepData!.lastSession!.durationMinutes;
+                                                    const widthPercent = (stage.durationMinutes / totalDuration) * 100;
+
+                                                    let backgroundColor = COLORS.border;
+                                                    if (stage.stage === 'DEEP') backgroundColor = '#3D3B8E';
+                                                    if (stage.stage === 'LIGHT') backgroundColor = '#6D67E4';
+                                                    if (stage.stage === 'REM') backgroundColor = '#9F97F7';
+                                                    if (stage.stage === 'AWAKE') backgroundColor = '#FFAB76';
+
+                                                    if (widthPercent <= 0) return null;
+
+                                                    return (
+                                                        <View
+                                                            key={index}
+                                                            style={{
+                                                                width: `${widthPercent}%`,
+                                                                backgroundColor,
+                                                                height: '100%'
+                                                            }}
+                                                        />
+                                                    );
+                                                })}
+                                            </View>
+                                            <View style={styles.sleepStageLabels}>
+                                                <View style={styles.sleepStageLegendItem}>
+                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#3D3B8E' }]} />
+                                                    <Text style={styles.sleepLegendText}>Deep</Text>
+                                                </View>
+                                                <View style={styles.sleepStageLegendItem}>
+                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#6D67E4' }]} />
+                                                    <Text style={styles.sleepLegendText}>Light</Text>
+                                                </View>
+                                                <View style={styles.sleepStageLegendItem}>
+                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#9F97F7' }]} />
+                                                    <Text style={styles.sleepLegendText}>REM</Text>
+                                                </View>
+                                                <View style={styles.sleepStageLegendItem}>
+                                                    <View style={[styles.sleepLegendDot, { backgroundColor: '#FFAB76' }]} />
+                                                    <Text style={styles.sleepLegendText}>Awake</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                         )}
@@ -664,16 +718,28 @@ const HeartRateChart = ({ data }: { data: Array<{ date: Date; min: number; max: 
 
     const chartData = useMemo(() => {
         if (data.length === 0) return null;
-        const allMins = data.map(d => d.min);
-        const allMaxs = data.map(d => d.max);
-        const minVal = Math.min(...allMins) - 10;
-        const maxVal = Math.max(...allMaxs) + 10;
-        const yRange = maxVal - minVal || 1;
+
+        // If only 1 data point, duplicate it to create a flat line or handle specifically
+        let processData = [...data];
+        if (processData.length === 1) {
+            // Push a dummy point to make a line
+            processData.push({ ...processData[0], date: new Date(processData[0].date.getTime() + 1000) });
+        }
+
+        const allMins = processData.map(d => d.min);
+        const allMaxs = processData.map(d => d.max);
+
+        // Add more breathing room
+        const minVal = Math.min(...allMins) - 5;
+        const maxVal = Math.max(...allMaxs) + 5;
+        const yRange = maxVal - minVal || 10; // Ensure range is never 0
+
         const chartWidth = width - padding.left - padding.right;
         const chartHeight = height - padding.top - padding.bottom;
 
-        const points = data.map((d, i) => {
-            const x = padding.left + (i / Math.max(data.length - 1, 1)) * chartWidth;
+        const points = processData.map((d, i) => {
+            // Distribute points evenly
+            const x = padding.left + (i / (processData.length - 1)) * chartWidth;
             const y = padding.top + (1 - (d.avg - minVal) / yRange) * chartHeight;
             return { x, y, ...d };
         });

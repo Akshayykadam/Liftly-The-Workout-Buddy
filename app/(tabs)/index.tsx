@@ -117,17 +117,30 @@ export default function HomeScreen() {
           <Text style={styles.stepProgressHint}>Tap to edit goal</Text>
         </TouchableOpacity>
 
-        {/* Exercise Stats Card */}
-        <View style={styles.exerciseStatsContainer}>
-          <View style={styles.exerciseStatCard}>
-            <View style={styles.statIconContainer}>
-              <Target size={24} color={COLORS.accent} strokeWidth={2.5} />
+        {/* Workout Goal Card - Linear Design */}
+        <View style={styles.stepProgressCard}>
+          <View style={styles.stepProgressHeader}>
+            <View style={styles.stepProgressLeft}>
+              <Target size={20} color={COLORS.accent} strokeWidth={2.5} />
+              <Text style={styles.stepProgressLabel}>Workout Goal</Text>
             </View>
-            <Text style={styles.statValue}>
-              {todayStats.completed}/{todayStats.total}
+            <Text style={styles.stepProgressValue}>
+              {todayStats.completed} / {todayStats.total}
             </Text>
-            <Text style={styles.statLabel}>Exercises</Text>
           </View>
+          <View style={styles.stepProgressBarContainer}>
+            <View
+              style={[
+                styles.stepProgressBar,
+                { width: `${Math.min((todayStats.completed / Math.max(todayStats.total, 1)) * 100, 100)}%` }
+              ]}
+            />
+          </View>
+          <Text style={styles.stepProgressHint}>
+            {todayStats.completed === todayStats.total && todayStats.total > 0
+              ? 'All exercises completed!'
+              : `${todayStats.total - todayStats.completed} exercises remaining`}
+          </Text>
         </View>
       </View>
 
@@ -424,6 +437,13 @@ function ExerciseCard({ exercise, isCompleted, onToggleComplete, onPress }: Exer
         activeOpacity={1}
       >
         <View style={styles.cardContent}>
+          {exercise.image && (
+            <Image
+              source={exercise.image}
+              style={styles.cardExerciseImage}
+              resizeMode="cover"
+            />
+          )}
           <View style={styles.cardLeft}>
             <Text style={styles.exerciseName}>{exercise.name}</Text>
             <Text style={styles.exerciseDetail}>
@@ -601,9 +621,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 20
   },
+  cardExerciseImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    marginRight: 16,
+    backgroundColor: COLORS.border
+  },
   cardLeft: {
     flex: 1,
-    marginRight: 16
+    marginRight: 16,
+    justifyContent: 'center'
   },
   exerciseName: {
     fontSize: 18,

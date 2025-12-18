@@ -92,104 +92,7 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
         ? Math.min((dashboardData.steps.today / stepGoal) * 100, 100)
         : 0;
 
-    // ============ MOCK DATA FOR WEB DEMO ============
-
-    const loadWebDemoData = () => {
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const weeklyData: DailySteps[] = [];
-
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            date.setHours(0, 0, 0, 0);
-            weeklyData.push({
-                date,
-                steps: Math.floor(Math.random() * 8000) + 4000, // Random 4000-12000 steps
-                dayName: dayNames[date.getDay()],
-            });
-        }
-        // Make today's steps higher
-        weeklyData[6].steps = 8432;
-
-        const weeklyTotal = weeklyData.reduce((sum, d) => sum + d.steps, 0);
-
-        setDashboardData({
-            steps: {
-                today: 8432,
-                weeklyData,
-                weeklyTotal,
-                weeklyAverage: Math.round(weeklyTotal / 7),
-            },
-            heartRate: {
-                current: 72,
-                resting: 58,
-                lastUpdated: new Date().toISOString(),
-                history: [
-                    { date: new Date(Date.now() - 6 * 86400000), min: 52, max: 145, avg: 68 },
-                    { date: new Date(Date.now() - 5 * 86400000), min: 54, max: 138, avg: 71 },
-                    { date: new Date(Date.now() - 4 * 86400000), min: 53, max: 152, avg: 74 },
-                    { date: new Date(Date.now() - 3 * 86400000), min: 51, max: 144, avg: 69 },
-                    { date: new Date(Date.now() - 2 * 86400000), min: 55, max: 156, avg: 75 },
-                    { date: new Date(Date.now() - 1 * 86400000), min: 50, max: 148, avg: 72 },
-                    { date: new Date(), min: 56, max: 142, avg: 70 },
-                ],
-            },
-            calories: {
-                active: 420,
-                basal: 1680,
-                total: 2100,
-            },
-            exercise: {
-                recentSessions: [
-                    {
-                        id: '1',
-                        exerciseType: 'RUNNING',
-                        title: 'Morning Run',
-                        startTime: new Date(Date.now() - 3600000).toISOString(),
-                        endTime: new Date().toISOString(),
-                        durationMinutes: 32,
-                        distanceMeters: 5200,
-                        activeCalories: 320,
-                    },
-                    {
-                        id: '2',
-                        exerciseType: 'STRENGTH_TRAINING',
-                        title: 'Gym Workout',
-                        startTime: new Date(Date.now() - 86400000).toISOString(),
-                        endTime: new Date(Date.now() - 86400000 + 2700000).toISOString(),
-                        durationMinutes: 45,
-                        activeCalories: 280,
-                    },
-                ],
-                todayDurationMinutes: 32,
-            },
-            sleep: {
-                lastSession: {
-                    id: 'sleep-1',
-                    startTime: new Date(Date.now() - 28800000).toISOString(), // 8 hours ago
-                    endTime: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-                    durationMinutes: 452,
-                    stages: [
-                        { stage: 'LIGHT', startTime: '', endTime: '', durationMinutes: 180 },
-                        { stage: 'DEEP', startTime: '', endTime: '', durationMinutes: 105 },
-                        { stage: 'REM', startTime: '', endTime: '', durationMinutes: 130 },
-                        { stage: 'AWAKE', startTime: '', endTime: '', durationMinutes: 37 },
-                    ],
-                },
-            },
-            body: {
-                weight: { value: 72.5, time: new Date().toISOString() },
-                height: { value: 175, time: new Date().toISOString() },
-                bodyFatPercentage: { value: 18.5, time: new Date().toISOString() },
-            },
-        });
-
-        setPermissions([
-            { permission: 'Steps', granted: true },
-            { permission: 'HeartRate', granted: true },
-            { permission: 'ExerciseSession', granted: true },
-        ]);
-    };
+    // ============ NO MOCK DATA - Web shows empty state ============
 
     // ============ INITIALIZATION ============
 
@@ -207,13 +110,13 @@ export const [HealthConnectProvider, useHealthConnect] = createContextHook(() =>
                 }
             }
 
-            // Web: Load demo data for UI preview
+            // Web: No Health Connect available - show empty state
             if (isWeb) {
-                loadWebDemoData();
-                setHealthConnectStatus('available');
-                setIsInitialized(true);
+                setHealthConnectStatus('not_supported');
+                setError('Health data is only available on Android devices with Health Connect');
+                setIsInitialized(false);
                 setIsLoading(false);
-                return true;
+                return false;
             }
 
             if (isAndroidDevice) {

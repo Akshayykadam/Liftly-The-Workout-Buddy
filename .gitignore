@@ -26,7 +26,6 @@ ios/build/
 # Metro bundler cache
 .expo/
 .expo-shared/
-package-lock.json
 expo-env.d.ts
 
 # React Native bundler cache
