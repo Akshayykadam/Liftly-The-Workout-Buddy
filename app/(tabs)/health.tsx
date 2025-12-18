@@ -344,8 +344,8 @@ export default function HealthTabScreen() {
                                 {/* Main Heart Rate Card */}
                                 <View style={styles.heartRateCard}>
                                     {/* Current Heart Rate */}
-                                    <View style={styles.heartRateHeader}>
-                                        <View style={styles.heartRateMainRow}>
+                                    <View style={[styles.heartRateHeader, { alignItems: 'flex-start' }]}>
+                                        <View style={[styles.heartRateMainRow, { alignItems: 'flex-start' }]}>
                                             <View style={styles.heartRateIconContainer}>
                                                 <Heart size={28} color={COLORS.red} fill={COLORS.red} />
                                             </View>
@@ -359,15 +359,13 @@ export default function HealthTabScreen() {
                                                 </View>
                                             </View>
                                         </View>
-                                    </View>
-                                    {heartRateData.resting && (
-                                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
+                                        {heartRateData.resting && (
                                             <View style={styles.heartRateRestingBadge}>
                                                 <Text style={styles.heartRateRestingBadgeLabel}>Resting</Text>
                                                 <Text style={styles.heartRateRestingBadgeValue}>{heartRateData.resting} bpm</Text>
                                             </View>
-                                        </View>
-                                    )}
+                                        )}
+                                    </View>
 
                                     {/* Heart Rate Stats Grid */}
                                     {heartRateData.history && heartRateData.history.length > 0 && (
@@ -717,47 +715,78 @@ const DailyHeartRateChart = ({ samples }: { samples: HeartRateSample[] }) => {
     const chartData = useMemo(() => {
         if (!samples || samples.length === 0) return null;
 
-        // Sort samples by time
+        // 1. Sort samples by time
         const sortedSamples = [...samples].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
-        // Calculate Y scale (BPM)
-        const bpms = sortedSamples.map(s => s.beatsPerMinute);
-        const minBpm = Math.min(...bpms);
-        const maxBpm = Math.max(...bpms);
-        // Add padding to Y scale
+        // 2. Aggregate into 10-minute buckets to smooth the line
+        const bucketSizeMinutes = 10;
+        const buckets = new Map<number, number[]>();
+
+        sortedSamples.forEach(sample => {
+            const date = new Date(sample.time);
+            // Calculate total minutes from midnight (0-1439)
+            const minutesFromMidnight = date.getHours() * 60 + date.getMinutes();
+            // Determine which bucket this sample belongs to
+            const bucketIndex = Math.floor(minutesFromMidnight / bucketSizeMinutes);
+
+            if (!buckets.has(bucketIndex)) {
+                buckets.set(bucketIndex, []);
+            }
+            buckets.get(bucketIndex)?.push(sample.beatsPerMinute);
+        });
+
+        // 3. Create points from buckets
+        const smoothedPoints: { x: number, y: number, val: number, timeIndex: number }[] = [];
+
+        // Iterate through all possible buckets for the day (0 to 95 for 15-min intervals)
+        // Or just iterate existing buckets if we want gaps?
+        // Let's iterate sorted keys to draw lines between available data
+        const sortedBucketIndices = Array.from(buckets.keys()).sort((a, b) => a - b);
+
+        // Calculate scales
+        // Find min/max from the aggregated average values, not raw samples, to stabilize the scale
+        let allAvgs: number[] = [];
+        sortedBucketIndices.forEach(idx => {
+            const vals = buckets.get(idx) || [];
+            const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+            allAvgs.push(avg);
+        });
+
+        if (allAvgs.length === 0) return null;
+
+        const minBpm = Math.min(...allAvgs);
+        const maxBpm = Math.max(...allAvgs);
         const yMin = Math.max(40, minBpm - 5);
         const yMax = Math.max(100, maxBpm + 5);
         const yRange = yMax - yMin;
 
-        // Calculate X scale (Time: 00:00 to 23:59 in minutes)
-        // We'll map the actual sample time to the day's timeline
-        const getMinutes = (dateStr: string) => {
-            const d = new Date(dateStr);
-            return d.getHours() * 60 + d.getMinutes();
-        };
-
-        // Use earliest and latest sample time for dynamic range, OR fixed 0-24h
-        // User asked for "today's all... 12am to 11:50pm", so fixed 0-24h (1440 mins) is safer for context
         const xMin = 0;
-        const xMax = 1440; // 24 hours * 60 minutes
+        const xMax = 1440; // 24 hours in minutes
 
-        const points = sortedSamples.map(sample => {
-            const mins = getMinutes(sample.time);
-            const x = padding.left + (mins / 1440) * chartWidth;
-            const y = padding.top + (1 - (sample.beatsPerMinute - yMin) / yRange) * chartHeight;
-            return { x, y, val: sample.beatsPerMinute, time: sample.time };
-        });
+        smoothedPoints.push(...sortedBucketIndices.map(idx => {
+            const vals = buckets.get(idx) || [];
+            const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 
-        // Create Path
+            // Time is the middle of the bucket
+            const timeInMinutes = (idx * bucketSizeMinutes) + (bucketSizeMinutes / 2);
+
+            const x = padding.left + (timeInMinutes / xMax) * chartWidth;
+            const y = padding.top + (1 - (avg - yMin) / yRange) * chartHeight;
+
+            return { x, y, val: avg, timeIndex: idx };
+        }));
+
+        // 4. Create Path (curved or straight? Straight is safer for now)
         let path = "";
-        if (points.length > 0) {
-            path = `M ${points[0].x} ${points[0].y}`;
-            for (let i = 1; i < points.length; i++) {
-                path += ` L ${points[i].x} ${points[i].y}`;
+        if (smoothedPoints.length > 0) {
+            path = `M ${smoothedPoints[0].x} ${smoothedPoints[0].y}`;
+            for (let i = 1; i < smoothedPoints.length; i++) {
+                // Simple line to reduce noise
+                path += ` L ${smoothedPoints[i].x} ${smoothedPoints[i].y}`;
             }
         }
 
-        return { points, path, yMin, yMax };
+        return { points: smoothedPoints, path, yMin, yMax };
     }, [samples, width, height]);
 
     if (!chartData) return <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginVertical: 20 }}>No data for today</Text>;
@@ -878,9 +907,10 @@ const styles = StyleSheet.create({
     heartRateMain: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     heartRateValue: { fontSize: 36, fontWeight: '700', color: COLORS.textPrimary },
     heartRateUnit: { fontSize: 14, color: COLORS.textSecondary, fontWeight: '600' },
-    heartRateRestingBadge: { backgroundColor: COLORS.surface, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: COLORS.border },
-    heartRateRestingBadgeLabel: { fontSize: 10, color: COLORS.textSecondary, fontWeight: '500' },
-    heartRateRestingBadgeValue: { fontSize: 14, fontWeight: '700', color: COLORS.red, marginTop: 2 },
+    // Simplified Resting Display (No badge to save space)
+    heartRateRestingBadge: { alignItems: 'flex-end', marginTop: 4 },
+    heartRateRestingBadgeLabel: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '500' },
+    heartRateRestingBadgeValue: { fontSize: 16, fontWeight: '700', color: COLORS.red, marginTop: 2 },
     heartRateResting: { alignItems: 'flex-end' },
     heartRateRestingLabel: { fontSize: 12, color: COLORS.textSecondary },
     heartRateRestingValue: { fontSize: 16, fontWeight: '600', color: COLORS.textPrimary, marginTop: 2 },
